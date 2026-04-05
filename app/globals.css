@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'InterTight';
+  src: url("/fonts/InterTight-Medium.ttf") format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'InterTight';
+  src: url("/fonts/InterTight-Regular.ttf") format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+@font-face {
+  font-family: 'BebasNeue';
+  src: url("/fonts/BebasNeue.ttf") format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'NeueTrial';
+  src: url("/fonts/TTFirsNeueTrial-Regular.ttf") format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'NeueTrial';
+  src: url("/fonts/TTFirsNeueTrial-Medium.ttf") format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+
+@theme {
+  --color-dark: #0d0e13;
+  --color-orange: #FB4114;
+  --color-silver: #707070;
+  --color-light-gray: #C8C8C8;
+  --font-sans: "InterTight", sans-serif;
+  --font-bebas: "BebasNeue", sans-serif;
+  --font-neue: "NeueTrial", sans-serif;
+
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+
+
+.services-box {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.services-box::-webkit-scrollbar {
+  width: 2px;
+  height: 2px;
+}
+
+.services-box::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.services-box::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0;
+  height: 0;
+}
+
+::-webkit-scrollbar-show-resolution-button {
+  display: none !important;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+
+
+.container {
+  width: 100%;
+  max-width: 1665px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+
+
+
+@media (min-width:768px) {
+  .md-container {
+    width: 100%;
+    max-width: 1685px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+}
+
+@media (max-width:768px) {
+  .container {
+    padding-left: 19px;
+    padding-right: 19px;
+  }
+}
