@@ -9,37 +9,37 @@ const casesData = [
     id: "01",
     customer: "Форум НКО «Территория идей»",
     task: "многокамерная съемка и Afterlife-ролики",
-    videoSrc: "/videos/cases/1.mp4",
+    videoSrc: "/videos/hero-bg.mp4",
   },
   {
     id: "02",
     customer: "Форум НКО «Территория идей»",
     task: "многокамерная съемка и Afterlife-ролики",
-    videoSrc: "/videos/cases/2.mp4",
+    videoSrc: "/videos/hero-bg.mp4",
   },
   {
     id: "03",
     customer: "Форум НКО «Территория идей»",
     task: "многокамерная съемка и Afterlife-ролики",
-    videoSrc: "/videos/cases/3.mp4",
+    videoSrc: "/videos/hero-bg.mp4",
   },
   {
     id: "04",
     customer: "Форум НКО «Территория идей»",
     task: "многокамерная съемка и Afterlife-ролики",
-    videoSrc: "/videos/cases/4.mp4",
+    videoSrc: "/videos/hero-bg.mp4",
   },
   {
     id: "05",
     customer: "Форум НКО «Территория идей»",
     task: "многокамерная съемка и Afterlife-ролики",
-    videoSrc: "/videos/cases/5.mp4",
+    videoSrc: "/videos/hero-bg.mp4",
   },
   {
     id: "06",
     customer: "Форум НКО «Территория идей»",
     task: "многокамерная съемка и Afterlife-ролики",
-    videoSrc: "/videos/cases/6.mp4",
+    videoSrc: "/videos/hero-bg.mp4",
   },
 ];
 
