@@ -1,5 +1,5 @@
 import { defineConfig } from "sanity";
-import { deskTool } from "sanity/desk";
+import { structureTool } from "sanity/structure";
 import { schemaTypes } from "./schemaTypes";
 
 export default defineConfig({
@@ -11,7 +11,7 @@ export default defineConfig({
 
   basePath: "/admin",
 
-  plugins: [deskTool()],
+  plugins: [structureTool()],
 
   schema: {
     types: schemaTypes,
