@@ -1,5 +1,15 @@
 "use client";
+
+import React, { useState, useEffect } from "react";
 import Title from "../ui/title";
+import { createClient } from "next-sanity";
+
+const client = createClient({
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+  dataset: "production",
+  apiVersion: "2026-01-01",
+  useCdn: true,
+});
 
 type Item = {
   title: string;
@@ -7,32 +17,28 @@ type Item = {
 };
 
 export default function Advantages() {
-  const items: Item[] = [
-    {
-      title: "Живые кадры",
-      desc: "Резервные каналы, режиссерский контроль, бесперебойный поток",
-    },
-    {
-      title: "Живые кадры",
-      desc: "Динамичная съемка с акцентом на главное",
-    },
-    {
-      title: "Скорость",
-      desc: "Готовый Reels уже через 48 часов после съёмки",
-    },
-    {
-      title: "Опыт в B2B и НКО",
-      desc: "Знаем, как снимать форумы, презентации и социальные проекты.",
-    },
-    {
-      title: "Прозрачность",
-      desc: "Договор, отчётность, без скрытых условий.",
-    },
-    {
-      title: "Всё под ключ",
-      desc: "Подготовка, эфир, монтаж, публикация.",
-    },
-  ];
+  const [items, setItems] = useState<Item[]>([]);
+
+  useEffect(() => {
+    const fetchAdvantages = async () => {
+      try {
+        const data = await client.fetch(
+          `*[_type == "advantage"] | order(order asc) {
+            title,
+            desc
+          }`,
+        );
+        setItems(data);
+      } catch (error) {
+        console.error("Sanity fetch error:", error);
+      }
+    };
+
+    fetchAdvantages();
+  }, []);
+
+  const firstColumn = items.slice(0, 3);
+  const secondColumn = items.slice(3, 6);
 
   return (
     <section id="advantages" className="container relative z-10">
@@ -41,7 +47,7 @@ export default function Advantages() {
           description={
             <>
               Мы снимаем и транслируем события, <br /> где важна и атмосфера, и
-              результат.
+              результата.
             </>
           }
           title="Преимущества"
@@ -51,7 +57,7 @@ export default function Advantages() {
         </Title>
         <div className="flex items-start max-md:flex-col md:gap-[30px] justify-between">
           <div className="flex pt-[10px] flex-col md:gap-[120px]">
-            {items.slice(0, 3).map((e, i) => (
+            {firstColumn.map((e, i) => (
               <div
                 key={i}
                 className={`flex max-md:gap-[31px] max-md:py-[30px] max-md:border-b border-white/10 ${i == 0 ? "max-md:border-t" : ""}`}
@@ -81,13 +87,13 @@ export default function Advantages() {
           <div className="w-[603px] max-[1200px]:hidden h-[500px] shrink-0" />
 
           <div className="flex pt-[10px] flex-col md:gap-[120px]">
-            {items.slice(3).map((e, i) => (
+            {secondColumn.map((e, i) => (
               <div
                 key={i}
                 className="flex max-md:gap-[31px]  max-md:py-[30px] max-md:border-b border-white/10"
               >
                 <div className="flex text-orange md:hidden  text-[13px] pt-px gap-[10px] whitespace-nowrap">
-                  <span>{"[ "}</span>0{i + 1}
+                  <span>{"[ "}</span>0{i + 4}
                   <span>{"] "}</span>
                 </div>
                 <div className="flex max-sm:max-w-[324px] md:max-w-[300px] flex-col gap-[10px]">
@@ -109,7 +115,7 @@ export default function Advantages() {
         </div>
         <p className="absolute max-lg:hidden top-[17px] left-0 max-w-[340px] text-balance text-light-gray tracking-[-3%] text-[15px] leading-[133%]">
           Снимаем форумы, конференции и концерты так, чтобы каждый кадр
-          передавал атмосферу момента.
+          передаваал атмосферу момента.
         </p>
         <p className="absolute max-lg:hidden top-[17px] right-0 line-clamp-2 ml-auto text-balance text-light-gray tracking-[-3%] text-[15px] leading-[133%]">
           Сделаем ваше событие вирусным — <br /> чтобы о нём говорили снова и
@@ -119,3 +125,30 @@ export default function Advantages() {
     </section>
   );
 }
+
+// const items: Item[] = [
+//   {
+//     title: "Живые кадры",
+//     desc: "Резервные каналы, режиссерский контроль, бесперебойный поток",
+//   },
+//   {
+//     title: "Живые кадры",
+//     desc: "Динамичная съемка с акцентом на главное",
+//   },
+//   {
+//     title: "Скорость",
+//     desc: "Готовый Reels уже через 48 часов после съёмки",
+//   },
+//   {
+//     title: "Опыт в B2B и НКО",
+//     desc: "Знаем, как снимать форумы, презентации и социальные проекты.",
+//   },
+//   {
+//     title: "Прозрачность",
+//     desc: "Договор, отчётность, без скрытых условий.",
+//   },
+//   {
+//     title: "Всё под ключ",
+//     desc: "Подготовка, эфир, монтаж, публикация.",
+//   },
+// ];

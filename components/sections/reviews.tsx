@@ -5,7 +5,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import { motion } from "framer-motion";
-
+import { createClient } from "next-sanity";
 import "swiper/css";
 import "swiper/css/navigation";
 import Image from "next/image";
@@ -89,12 +89,44 @@ const TOTAL = reviews.length;
 const BASE_OFFSET = 72;
 const ITEM_WIDTH = 64;
 
+const client = createClient({
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+  dataset: "production",
+  apiVersion: "2026-01-01",
+  useCdn: true,
+});
+
 export default function ReviewsSlider() {
+  const [data, setData] = useState<ReviewData[] | null>(null);
+
   const swiperRef = useRef<SwiperType | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [playingVideoId, setPlayingVideoId] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await client.fetch(
+          `*[_type == "review"] | order(order asc) {
+            "id": _id,
+            "companyImg": companyImg.asset->url,
+            text,
+            authorName,
+            authorDate,
+            "authorAvatar": authorAvatar.asset->url,
+            "videoSrc": video.asset->url,
+            "videoPrev": videoPrev.asset->url
+          }`,
+        );
+        setData(res);
+      } catch (error) {
+        console.error("Sanity fetch error:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -168,114 +200,115 @@ export default function ReviewsSlider() {
             stopAllVideos();
           }}
         >
-          {reviews.map((review, index) => (
-            <SwiperSlide
-              key={review.id}
-              className="h-auto! flex perspective-[1000px]"
-            >
-              <motion.div
-                className="relative w-full h-full transform-3d cursor-pointer"
-                initial={false}
-                animate={{
-                  rotateY: isMobile ? 180 : activeIndex === index ? 180 : 0,
-                }}
-                transition={{ duration: 0.6, bounce: 0 }}
-                onClick={() =>
-                  activeIndex === index && handlePlayPause(review.id)
-                }
+          {data &&
+            data.map((review, index) => (
+              <SwiperSlide
+                key={review.id}
+                className="h-auto! flex perspective-[1000px]"
               >
-                <div className="h-full! w-full border border-[#555555] pt-[34px] pl-[30px] pb-[60px] pr-[53px] gap-[60px] max-md:gap-10 max-md:p-5 flex flex-col justify-start bg-[#0a0a0a] backface-hidden">
-                  <Image
-                    width={95}
-                    height={60}
-                    src={review.companyImg || ""}
-                    alt="company"
-                    className="w-[95px] h-min object-contain"
-                  />
-                  <p className="text-[#a1a1a1] whitespace-pre-wrap text-sm md:text-base leading-[131%] tracking-[-3%]">
-                    {review.text}
-                  </p>
-                  <div className="flex items-center gap-4 mt-auto">
-                    <div className="w-[34px] h-[34px] rounded-full bg-gray-800 overflow-hidden shrink-0">
-                      <Image
-                        width={40}
-                        height={40}
-                        src={review.authorAvatar || ""}
-                        alt={review.authorName || ""}
-                        className="w-[34px] h-[34px] object-cover"
-                      />
-                    </div>
-                    <div>
-                      <div className="text-white text-[15px] tracking-[-3%] leading-[131%]">
-                        {review.authorName}
-                      </div>
-                      <div className="text-white/54 text-[13px] tracking-[-3%] leading-[131%] mt-0.5">
-                        {review.authorDate}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="absolute inset-0 w-full h-full md:min-h-[534px] overflow-hidden group backface-hidden transform-[rotateY(180deg)]">
-                  <div className="flex items-center h-full w-full relative justify-center">
+                <motion.div
+                  className="relative w-full h-full transform-3d cursor-pointer"
+                  initial={false}
+                  animate={{
+                    rotateY: isMobile ? 180 : activeIndex === index ? 180 : 0,
+                  }}
+                  transition={{ duration: 0.6, bounce: 0 }}
+                  onClick={() =>
+                    activeIndex === index && handlePlayPause(review.id)
+                  }
+                >
+                  <div className="h-full! w-full border border-[#555555] pt-[34px] pl-[30px] pb-[60px] pr-[53px] gap-[60px] max-md:gap-10 max-md:p-5 flex flex-col justify-start bg-[#0a0a0a] backface-hidden">
                     <Image
-                      alt="Bg"
-                      width={500}
-                      height={500}
-                      className="absolute -z-1 w-full h-full blur-[70px]"
-                      src={review.videoPrev}
+                      width={95}
+                      height={60}
+                      src={review.companyImg || ""}
+                      alt="company"
+                      className="w-[95px] h-min object-contain"
                     />
-                    <video
-                      ref={(el) => {
-                        if (el) videoRefs.current.set(review.id, el);
-                        else videoRefs.current.delete(review.id);
-                      }}
-                      className="absolute inset-0 w-full h-full object-contain"
-                      preload="metadata"
-                      playsInline
-                      loop
-                      onEnded={() => setPlayingVideoId(null)}
-                    >
-                      <source src={review.videoSrc} type="video/mp4" />
-                    </video>
-                    <div
-                      className={`absolute inset-0 bg-black/20 transition-opacity duration-500 ${playingVideoId === review.id ? "opacity-0" : "opacity-100"}`}
-                    />
-                    <div
-                      className={`relative z-10 rounded-full flex items-center justify-center transition-all duration-300 ${playingVideoId === review.id ? "opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100" : "opacity-100 scale-100 group-hover:scale-110"}`}
-                    >
-                      <div
-                        className={`w-[93px] h-[93px] bg-white/45 backdrop-blur-[14px] rounded-full flex items-center justify-center ${playingVideoId === review.id ? "" : "pl-1"}`}
-                      >
-                        {playingVideoId === review.id ? (
-                          <svg
-                            width="30"
-                            height="30"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                          >
-                            <path
-                              d="M6 19H10V5H6V19ZM14 5V19H18V5H14Z"
-                              fill="#fff"
-                            />
-                          </svg>
-                        ) : (
-                          <svg
-                            width="30"
-                            height="30"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                          >
-                            <path d="M8 5V19L19 12L8 5Z" fill="#fff" />
-                          </svg>
-                        )}
+                    <p className="text-[#a1a1a1] whitespace-pre-wrap text-sm md:text-base leading-[131%] tracking-[-3%]">
+                      {review.text}
+                    </p>
+                    <div className="flex items-center gap-4 mt-auto">
+                      <div className="w-[34px] h-[34px] rounded-full bg-gray-800 overflow-hidden shrink-0">
+                        <Image
+                          width={40}
+                          height={40}
+                          src={review.authorAvatar || ""}
+                          alt={review.authorName || ""}
+                          className="w-[34px] h-[34px] object-cover"
+                        />
+                      </div>
+                      <div>
+                        <div className="text-white text-[15px] tracking-[-3%] leading-[131%]">
+                          {review.authorName}
+                        </div>
+                        <div className="text-white/54 text-[13px] tracking-[-3%] leading-[131%] mt-0.5">
+                          {review.authorDate}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            </SwiperSlide>
-          ))}
+
+                  <div className="absolute inset-0 w-full h-full md:min-h-[534px] overflow-hidden group backface-hidden transform-[rotateY(180deg)]">
+                    <div className="flex items-center h-full w-full relative justify-center">
+                      <Image
+                        alt="Bg"
+                        width={500}
+                        height={500}
+                        className="absolute -z-1 w-full h-full blur-[70px]"
+                        src={review.videoPrev}
+                      />
+                      <video
+                        ref={(el) => {
+                          if (el) videoRefs.current.set(review.id, el);
+                          else videoRefs.current.delete(review.id);
+                        }}
+                        className="absolute inset-0 w-full h-full object-contain"
+                        preload="metadata"
+                        playsInline
+                        loop
+                        onEnded={() => setPlayingVideoId(null)}
+                      >
+                        <source src={review.videoSrc} type="video/mp4" />
+                      </video>
+                      <div
+                        className={`absolute inset-0 bg-black/20 transition-opacity duration-500 ${playingVideoId === review.id ? "opacity-0" : "opacity-100"}`}
+                      />
+                      <div
+                        className={`relative z-10 rounded-full flex items-center justify-center transition-all duration-300 ${playingVideoId === review.id ? "opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100" : "opacity-100 scale-100 group-hover:scale-110"}`}
+                      >
+                        <div
+                          className={`w-[93px] h-[93px] bg-white/45 backdrop-blur-[14px] rounded-full flex items-center justify-center ${playingVideoId === review.id ? "" : "pl-1"}`}
+                        >
+                          {playingVideoId === review.id ? (
+                            <svg
+                              width="30"
+                              height="30"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <path
+                                d="M6 19H10V5H6V19ZM14 5V19H18V5H14Z"
+                                fill="#fff"
+                              />
+                            </svg>
+                          ) : (
+                            <svg
+                              width="30"
+                              height="30"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <path d="M8 5V19L19 12L8 5Z" fill="#fff" />
+                            </svg>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </SwiperSlide>
+            ))}
         </Swiper>
       </div>
 

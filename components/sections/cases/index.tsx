@@ -3,48 +3,45 @@
 import Title from "../../ui/title";
 import React, { useState, useEffect } from "react";
 import VideoPlayer from "./videoPlayer";
+import { createClient } from "next-sanity";
 
-const casesData = [
-  {
-    id: "01",
-    customer: "Форум НКО «Территория идей»",
-    task: "многокамерная съемка и Afterlife-ролики",
-    videoSrc: "/videos/hero-bg.mp4",
-  },
-  {
-    id: "02",
-    customer: "Форум НКО «Территория идей»",
-    task: "многокамерная съемка и Afterlife-ролики",
-    videoSrc: "/videos/hero-bg.mp4",
-  },
-  {
-    id: "03",
-    customer: "Форум НКО «Территория идей»",
-    task: "многокамерная съемка и Afterlife-ролики",
-    videoSrc: "/videos/hero-bg.mp4",
-  },
-  {
-    id: "04",
-    customer: "Форум НКО «Территория идей»",
-    task: "многокамерная съемка и Afterlife-ролики",
-    videoSrc: "/videos/hero-bg.mp4",
-  },
-  {
-    id: "05",
-    customer: "Форум НКО «Территория идей»",
-    task: "многокамерная съемка и Afterlife-ролики",
-    videoSrc: "/videos/hero-bg.mp4",
-  },
-  {
-    id: "06",
-    customer: "Форум НКО «Территория идей»",
-    task: "многокамерная съемка и Afterlife-ролики",
-    videoSrc: "/videos/hero-bg.mp4",
-  },
-];
+const client = createClient({
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+  dataset: "production",
+  apiVersion: "2026-01-01",
+  useCdn: true,
+});
+
+interface CaseItem {
+  _id: string;
+  customer: string;
+  task: string;
+  videoSrc: string;
+}
 
 export default function Projects() {
+  const [casesData, setCasesData] = useState<CaseItem[]>([]);
   const [modalVideoSrc, setModalVideoSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCases = async () => {
+      try {
+        const data = await client.fetch(
+          `*[_type == "case"] | order(order asc) {
+            _id,
+            customer,
+            task,
+            "videoSrc": video.asset->url
+          }`,
+        );
+        setCasesData(data);
+      } catch (error) {
+        console.error("Sanity fetch error:", error);
+      }
+    };
+
+    fetchCases();
+  }, []);
 
   useEffect(() => {
     if (modalVideoSrc) {
@@ -75,9 +72,9 @@ export default function Projects() {
           Кейсы видеосъёмки и онлайн- <br /> трансляций мероприятий
         </Title>
         <div className="grid grid-cols-1 md:mt-[-54px] max-md:gap-[37px] sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-21">
-          {casesData.map((item) => (
+          {casesData.map((item, index) => (
             <div
-              key={item.id}
+              key={item._id}
               className="group relative flex flex-col transition-all duration-500 ease-in-out cursor-pointer"
               onClick={() => setModalVideoSrc(item.videoSrc)}
             >
@@ -93,7 +90,8 @@ export default function Projects() {
                   </p>
                 </div>
                 <span className="text-white/40 flex items-center gap-2 text-[15px] font-sans  leading-[133%] tracking-[-2%] max-md:absolute  top-[10px] right-[12px]">
-                  {"[  "} <span> {item.id}</span> {"  ]"}
+                  {"[  "} <span>{String(index + 1).padStart(2, "0")}</span>{" "}
+                  {"  ]"}
                 </span>
               </div>
             </div>
@@ -133,3 +131,42 @@ export default function Projects() {
     </>
   );
 }
+
+// const casesData = [
+//   {
+//     id: "01",
+//     customer: "Форум НКО «Территория идей»",
+//     task: "многокамерная съемка и Afterlife-ролики",
+//     videoSrc: "/videos/hero-bg.mp4",
+//   },
+//   {
+//     id: "02",
+//     customer: "Форум НКО «Территория идей»",
+//     task: "многокамерная съемка и Afterlife-ролики",
+//     videoSrc: "/videos/hero-bg.mp4",
+//   },
+//   {
+//     id: "03",
+//     customer: "Форум НКО «Территория идей»",
+//     task: "многокамерная съемка и Afterlife-ролики",
+//     videoSrc: "/videos/hero-bg.mp4",
+//   },
+//   {
+//     id: "04",
+//     customer: "Форум НКО «Территория идей»",
+//     task: "многокамерная съемка и Afterlife-ролики",
+//     videoSrc: "/videos/hero-bg.mp4",
+//   },
+//   {
+//     id: "05",
+//     customer: "Форум НКО «Территория идей»",
+//     task: "многокамерная съемка и Afterlife-ролики",
+//     videoSrc: "/videos/hero-bg.mp4",
+//   },
+//   {
+//     id: "06",
+//     customer: "Форум НКО «Территория идей»",
+//     task: "многокамерная съемка и Afterlife-ролики",
+//     videoSrc: "/videos/hero-bg.mp4",
+//   },
+// ];

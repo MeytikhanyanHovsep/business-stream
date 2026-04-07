@@ -1,8 +1,40 @@
 "use client";
+import React, { useEffect, useState } from "react";
 import { useLenis } from "lenis/react";
 import Button from "./ui/button";
+import { usePathname } from "next/navigation";
+import { createClient } from "next-sanity";
+
+const client = createClient({
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+  dataset: "production",
+  apiVersion: "2026-01-01",
+  useCdn: true,
+});
+
+interface FooterData {
+  title?: string;
+  phone?: string;
+  telegram?: string;
+  email?: string;
+  address?: string;
+}
 
 export default function Footer() {
+  const [data, setData] = useState<FooterData | null>(null);
+
+  useEffect(() => {
+    const fetchFooter = async () => {
+      try {
+        const res = await client.fetch(`*[_type == "footer"][0]`);
+        setData(res);
+      } catch (error) {
+        console.error("Sanity fetch error:", error);
+      }
+    };
+    fetchFooter();
+  }, []);
+
   const menu = [
     { label: "Главная", target: "#home" },
     { label: "Преимущества", target: "#advantages" },
@@ -14,6 +46,7 @@ export default function Footer() {
     { label: "Контакты", target: "#contacts" },
   ];
 
+  const path = usePathname();
   const lenis = useLenis();
 
   const handleScroll = (target: string) => {
@@ -24,6 +57,8 @@ export default function Footer() {
     });
   };
 
+  if (path != "/") return null;
+
   return (
     <footer
       id="contacts"
@@ -32,7 +67,8 @@ export default function Footer() {
       <div className="grid grid-cols-2 gap-[40px] max-[1100px]:grid-cols-1">
         <div className="flex flex-col max gap-[50px] ">
           <h3 className="text-[35px] leading-[106%] max-md:text-[32px] tracking-[-3%] max-w-[540px]">
-            Профессиональные трансляции и съёмка, которые работают на вас
+            {data?.title ||
+              "Профессиональные трансляции и съёмка, которые работают на вас"}
           </h3>
           <div className="flex max-sm:flex-col gap-[10px]">
             <Button modal="discuss" hasDetails={true} type="white">
@@ -65,16 +101,16 @@ export default function Footer() {
               контакты
             </li>
             <li className="text-[17px] max-md:opacity-62 max-sm:text-[14px] tracking-[-3%] leading-[137%] uppercase">
-              7 (911) 000-00-00
+              {data?.phone || "7 (911) 000-00-00"}
             </li>
             <li className="text-[17px] max-md:opacity-62 max-sm:text-[14px] tracking-[-3%] leading-[137%] uppercase">
-              <a href="#"> telegram</a>
+              <a href={data?.telegram || "#"}> telegram</a>
             </li>
             <li className="text-[17px] max-md:opacity-62 max-sm:text-[14px] tracking-[-3%] leading-[137%] uppercase">
-              <a href="#"> email</a>
+              <a href={data?.email ? `mailto:${data.email}` : "#"}> email</a>
             </li>
             <li className="text-[17px] max-md:opacity-62 max-sm:text-[14px] tracking-[-3%] leading-[137%] uppercase">
-              Санкт-Петербург, ул. Можайская 17
+              {data?.address || "Санкт-Петербург, ул. Можайская 17"}
             </li>
           </ul>
         </div>

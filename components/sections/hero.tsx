@@ -4,9 +4,25 @@ import Button from "../ui/button";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Advantages from "./advantages";
+import { createClient } from "next-sanity";
+
+const client = createClient({
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+  dataset: "production",
+  apiVersion: "2026-01-01",
+  useCdn: true,
+});
+
+interface HeroData {
+  titleLine1: string;
+  titleLine2: string;
+  subtitle: string;
+  videoUrl?: string;
+}
 
 export default function Hero() {
   const [width, setWidth] = useState<number | null>(null);
+  const [data, setData] = useState<HeroData | null>(null);
 
   const { scrollY } = useScroll();
   const videoY = useTransform(scrollY, [0, 1000], [-202, 1520]);
@@ -14,13 +30,25 @@ export default function Hero() {
   const videoHeight = useTransform(scrollY, [0, 1000], ["1019px", "455px"]);
 
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await client.fetch(`*[_type == "hero"][0]{
+          titleLine1,
+          titleLine2,
+          subtitle,
+          "videoUrl": video.asset->url
+        }`);
+        setData(res);
+      } catch (error) {
+        console.error("Sanity fetch error:", error);
+      }
+    };
+    fetchData();
+
     if (typeof window !== "undefined") {
       const handleResize = () => setWidth(window?.innerWidth);
-
       handleResize();
-
       window.addEventListener("resize", handleResize);
-
       return () => window.removeEventListener("resize", handleResize);
     }
   }, []);
@@ -41,7 +69,11 @@ export default function Hero() {
         }}
         className="absolute max-[1200px]:hidden! will-change-transform top-0 z-0 object-cover pointer-events-auto "
       >
-        <source className="w-full" src="/videos/hero-bg.mp4" type="video/mp4" />
+        <source
+          className="w-full"
+          src={data?.videoUrl || "/videos/hero-bg.mp4"}
+          type="video/mp4"
+        />
       </motion.video>
       <Image
         src="/images/hero-bg.png"
@@ -56,17 +88,28 @@ export default function Hero() {
         className="relative bg-linear-to-b from-black/50 via-black/50 to-black/0 z-10 w-full max-md:h-[759px] h-[817px]"
       >
         <div className="pt-[230px] h-full max-md:pt-[155px] container flex flex-col items-center">
-          <h2 className="uppercase min-h-max text-center max-md:max-w-min scale-y-[1.6] tracking-[-2%] leading-[103%] text-[75px] max-2xl:text-[60px] max-lg:text-[45px] max-xs:text-[40px]! font-bebas text-white w-full flex flex-col">
+          <h1 className="uppercase min-h-max text-center max-md:max-w-min scale-y-[1.6] tracking-[-2%] leading-[103%] text-[75px] max-2xl:text-[60px] max-lg:text-[45px] max-xs:text-[40px]! font-bebas text-white w-full flex flex-col">
             <span className="md:whitespace-nowrap">
-              Видеосъемка мероприятий
+              {data?.titleLine1 || "Видеосъемка мероприятий"}
             </span>
             <span className="md:whitespace-nowrap max-md:text-right">
-              и онлайн <span className="scale-y-[0.2] scale-x-[2]"> - </span>
-              трансляции
+              {data?.titleLine2 ? (
+                <>
+                  {data.titleLine2.split(" - ")[0]}{" "}
+                  <span className="scale-y-[0.2] scale-x-[2]"> - </span>{" "}
+                  {data.titleLine2.split(" - ")[1]}
+                </>
+              ) : (
+                <>
+                  и онлайн{" "}
+                  <span className="scale-y-[0.2] scale-x-[2]"> - </span>{" "}
+                  трансляции
+                </>
+              )}
             </span>
-          </h2>
+          </h1>
           <p className="tracking-[-4%] max-md:max-w-[270px] text-center text-white text-[21px] leading-[133%] mt-[50px]">
-            Reels-ролик с вашего события через 48 часов!
+            {data?.subtitle || "Reels-ролик с вашего события через 48 часов!"}
           </p>
           <div className="flex max-sm:w-full max-sm:flex-col gap-[10px] mt-[34px]">
             <Button modal="discuss" hasDetails={true} style="max-sm:min-w-full">
