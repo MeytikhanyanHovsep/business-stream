@@ -1,8 +1,40 @@
 import { defineField, defineType } from "sanity";
 
-export default defineType({
+export const casesSection = defineType({
+  name: "casesSection",
+  title: "Настройки секции Кейсы",
+  type: "document",
+  fields: [
+    defineField({
+      name: "sectionIndex",
+      title: "Индекс",
+      type: "string",
+      initialValue: "[06]",
+    }),
+    defineField({
+      name: "sectionTitle",
+      title: "Заголовок",
+      type: "string",
+      initialValue: "Кейсы",
+    }),
+    defineField({
+      name: "mainTitle",
+      title: "Главный заголовок",
+      type: "text",
+      rows: 2,
+    }),
+    defineField({
+      name: "description",
+      title: "Описание",
+      type: "text",
+      rows: 3,
+    }),
+  ],
+});
+
+export const caseItem = defineType({
   name: "case",
-  title: "Кейсы",
+  title: "Кейсы (контент)",
   type: "document",
   fields: [
     defineField({
@@ -22,16 +54,13 @@ export default defineType({
       name: "video",
       title: "Видео файл",
       type: "file",
-      options: {
-        accept: "video/*",
-      },
+      options: { accept: "video/*" },
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "order",
       title: "Порядок отображения",
       type: "number",
-      description: "Используется для ручной сортировки (1, 2, 3...)",
       initialValue: 0,
     }),
   ],

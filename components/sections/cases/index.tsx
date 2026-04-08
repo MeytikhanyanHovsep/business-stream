@@ -19,22 +19,35 @@ interface CaseItem {
   videoSrc: string;
 }
 
+interface CasesPageData {
+  settings: {
+    sectionIndex?: string;
+    sectionTitle?: string;
+    mainTitle?: string;
+    description?: string;
+  };
+  items: CaseItem[];
+}
+
 export default function Projects() {
-  const [casesData, setCasesData] = useState<CaseItem[]>([]);
+  const [data, setData] = useState<CasesPageData | null>(null);
   const [modalVideoSrc, setModalVideoSrc] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCases = async () => {
       try {
-        const data = await client.fetch(
-          `*[_type == "case"] | order(order asc) {
-            _id,
-            customer,
-            task,
-            "videoSrc": video.asset->url
+        const result = await client.fetch(
+          `{
+            "settings": *[_type == "casesSection"][0],
+            "items": *[_type == "case"] | order(order asc) {
+              _id,
+              customer,
+              task,
+              "videoSrc": video.asset->url
+            }
           }`,
         );
-        setCasesData(data);
+        setData(result);
       } catch (error) {
         console.error("Sanity fetch error:", error);
       }
@@ -54,25 +67,32 @@ export default function Projects() {
     };
   }, [modalVideoSrc]);
 
+  if (!data || data.items.length === 0) return null;
+
+  const { settings, items } = data;
+
   return (
     <>
       <section id="cases" className="container max-lg:pt-[50px] pt-[280px]">
         <Title
           gap={24}
           description={
-            <>
-              Снимаем эмоции, масштаб и человеческие истории. Работаем с PR- и
-              маркетинг- <br /> отделами, берём на себя организацию видеосъемки
-              и трансляций «под ключ»
-            </>
+            <span style={{ whiteSpace: "pre-line" }}>
+              {settings?.description ||
+                `Снимаем эмоции, масштаб и человеческие истории. Работаем с PR- и \n маркетинг- отделами, берём на себя организацию видеосъемки \n и трансляций «под ключ»`}
+            </span>
           }
-          title="Кейсы"
-          index="[06]"
+          title={settings?.sectionTitle || "Кейсы"}
+          index={settings?.sectionIndex || "[06]"}
         >
-          Кейсы видеосъёмки и онлайн- <br /> трансляций мероприятий
+          <span style={{ whiteSpace: "pre-line" }}>
+            {settings?.mainTitle ||
+              "Кейсы видеосъёмки и онлайн- \n трансляций мероприятий"}
+          </span>
         </Title>
+
         <div className="grid grid-cols-1 md:mt-[-54px] max-md:gap-[37px] sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-21">
-          {casesData.map((item, index) => (
+          {items.map((item, index) => (
             <div
               key={item._id}
               className="group relative flex flex-col transition-all duration-500 ease-in-out cursor-pointer"
@@ -89,7 +109,7 @@ export default function Projects() {
                     Задача: {item.task}
                   </p>
                 </div>
-                <span className="text-white/40 flex items-center gap-2 text-[15px] font-sans  leading-[133%] tracking-[-2%] max-md:absolute  top-[10px] right-[12px]">
+                <span className="text-white/40 flex items-center gap-2 text-[15px] font-sans leading-[133%] tracking-[-2%] max-md:absolute top-[10px] right-[12px]">
                   {"[  "} <span>{String(index + 1).padStart(2, "0")}</span>{" "}
                   {"  ]"}
                 </span>
@@ -131,42 +151,3 @@ export default function Projects() {
     </>
   );
 }
-
-// const casesData = [
-//   {
-//     id: "01",
-//     customer: "Форум НКО «Территория идей»",
-//     task: "многокамерная съемка и Afterlife-ролики",
-//     videoSrc: "/videos/hero-bg.mp4",
-//   },
-//   {
-//     id: "02",
-//     customer: "Форум НКО «Территория идей»",
-//     task: "многокамерная съемка и Afterlife-ролики",
-//     videoSrc: "/videos/hero-bg.mp4",
-//   },
-//   {
-//     id: "03",
-//     customer: "Форум НКО «Территория идей»",
-//     task: "многокамерная съемка и Afterlife-ролики",
-//     videoSrc: "/videos/hero-bg.mp4",
-//   },
-//   {
-//     id: "04",
-//     customer: "Форум НКО «Территория идей»",
-//     task: "многокамерная съемка и Afterlife-ролики",
-//     videoSrc: "/videos/hero-bg.mp4",
-//   },
-//   {
-//     id: "05",
-//     customer: "Форум НКО «Территория идей»",
-//     task: "многокамерная съемка и Afterlife-ролики",
-//     videoSrc: "/videos/hero-bg.mp4",
-//   },
-//   {
-//     id: "06",
-//     customer: "Форум НКО «Территория идей»",
-//     task: "многокамерная съемка и Afterlife-ролики",
-//     videoSrc: "/videos/hero-bg.mp4",
-//   },
-// ];

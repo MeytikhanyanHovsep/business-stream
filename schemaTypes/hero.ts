@@ -33,5 +33,17 @@ export default defineType({
         accept: "video/*",
       },
     }),
+    defineField({
+      name: "heroButton",
+      type: "string",
+      title: "Первая кнопка",
+      initialValue: "Обсудить проект",
+    }),
+    defineField({
+      name: "heroButton2",
+      type: "string",
+      title: "Вторая кнопка",
+      initialValue: "Live-аудит",
+    }),
   ],
 });

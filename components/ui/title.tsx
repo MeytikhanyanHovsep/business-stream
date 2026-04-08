@@ -22,7 +22,7 @@ export default function Title({
     >
       <h5 className=" tracking-[-2%] max-md:text-[12px] uppercase whitespace-nowrap gap-[2px] flex leading-[133%]">
         <span className="text-silver"> {index} </span>
-        <span className="text-orange "> {title}</span>
+        <span className="text-orange pl-0.5 "> {title}</span>
       </h5>
       <div className={`flex flex-col max-md:gap-[18px]  gap-[35px] col-span-2`}>
         <h3 className="text-[53px] max-md:text-[32px] leading-[106%] tracking-[-4%] text-balance">

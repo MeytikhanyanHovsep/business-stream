@@ -1,8 +1,34 @@
 import { defineField, defineType } from "sanity";
 
-export default defineType({
+export const reviewsSection = defineType({
+  name: "reviewsSection",
+  title: "Настройки секции Отзывы",
+  type: "document",
+  fields: [
+    defineField({
+      name: "sectionIndex",
+      title: "Индекс",
+      type: "string",
+      initialValue: "[07] ",
+    }),
+    defineField({
+      name: "sectionTitle",
+      title: "Заголовок",
+      type: "string",
+      initialValue: "отзывы",
+    }),
+    defineField({
+      name: "mainTitle",
+      title: "Главный заголовок",
+      type: "text",
+      rows: 2,
+    }),
+  ],
+});
+
+export const reviewItem = defineType({
   name: "review",
-  title: "Отзывы",
+  title: "Отзывы (контент)",
   type: "document",
   fields: [
     defineField({
@@ -10,26 +36,22 @@ export default defineType({
       title: "Логотип компании",
       type: "image",
       options: { hotspot: true },
-      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "text",
-      title: "Текст отзыва ( пишите '\n\n' для расстояние)",
+      title: "Текст отзыва",
       type: "text",
       rows: 5,
-      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "authorName",
       title: "Имя автора",
       type: "string",
-      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "authorDate",
       title: "Дата отзыва",
       type: "string",
-      description: "Например: 06.05.2025",
     }),
     defineField({
       name: "authorAvatar",
@@ -38,20 +60,16 @@ export default defineType({
       options: { hotspot: true },
     }),
     defineField({
-      name: "videoSrc",
-      title: "Видео отзыв (MP4)",
+      name: "video",
+      title: "Видео файл",
       type: "file",
-      options: {
-        accept: "video/*",
-      },
+      options: { accept: "video/*" },
     }),
     defineField({
       name: "videoPrev",
-      title: "Превью видео (обложка/блюр)",
+      title: "Превью видео",
       type: "image",
-      description: "Изображение, которое будет фоном за видео",
       options: { hotspot: true },
-      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "order",
@@ -60,10 +78,4 @@ export default defineType({
       initialValue: 0,
     }),
   ],
-  preview: {
-    select: {
-      title: "authorName",
-      media: "authorAvatar",
-    },
-  },
 });

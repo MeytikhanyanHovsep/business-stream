@@ -15,6 +15,16 @@ interface ServiceData {
   imgColor: "light" | "dark";
 }
 
+interface ServicesPageData {
+  settings: {
+    sectionIndex?: string;
+    sectionTitle?: string;
+    mainTitle?: string;
+    subTitle?: string;
+  };
+  services: ServiceData[];
+}
+
 const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
   dataset: "production",
@@ -28,39 +38,37 @@ function urlFor(source: SanityImageSource) {
 }
 
 export default function Services() {
-  const [services, setServices] = useState<ServiceData[]>([]);
+  const [data, setData] = useState<ServicesPageData | null>(null);
   const [activeService, setActiveService] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchServices = async () => {
+    const fetchAllData = async () => {
       try {
-        const data: ServiceData[] = await client.fetch(
-          `*[_type == "service"] | order(order asc)`,
-        );
-        setServices(data);
+        // Запрос сразу и настроек, и всех услуг
+        const result = await client.fetch(`{
+          "settings": *[_type == "servicesSection"][0],
+          "services": *[_type == "service"] | order(order asc)
+        }`);
+        setData(result);
       } catch (error) {
         console.error("Sanity fetch error:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchServices();
+    fetchAllData();
   }, []);
+
+  const services = data?.services || [];
+  const settings = data?.settings;
 
   const changeActive = (number: 1 | -1) => {
     if (services.length === 0) return;
     if (number > 0) {
-      if (services.length - activeService === 1) {
-        return setActiveService(0);
-      }
-      return setActiveService(activeService + 1);
-    }
-    if (number < 0) {
-      if (activeService === 0) {
-        return setActiveService(services.length - 1);
-      }
-      return setActiveService(activeService - 1);
+      setActiveService((prev) => (prev + 1 >= services.length ? 0 : prev + 1));
+    } else {
+      setActiveService((prev) => (prev === 0 ? services.length - 1 : prev - 1));
     }
   };
 
@@ -72,20 +80,32 @@ export default function Services() {
       className="md-container relative max-lg:pt-[112px] pt-[219px]"
     >
       <div className="max-md:px-[19px]">
-        <Title gap={80} title="Услуги" index="[04] ">
-          Услуги видеосъемки событий и трансляций <br />
-          <span className="max-md:hidden">
-            Выберите услугу, которая ближе <br /> к вашему формату события
+        <Title
+          gap={80}
+          title={settings?.sectionTitle || "Услуги"}
+          index={settings?.sectionIndex || "[04] "}
+        >
+          <span style={{ whiteSpace: "pre-line" }}>
+            {settings?.mainTitle || "Услуги видеосъемки событий и трансляций"}
+          </span>
+          <br />
+          <span className="max-md:hidden opacity-56 font-normal text-[15px] leading-[133%] tracking-[-3%]">
+            <span style={{ whiteSpace: "pre-line" }}>
+              {settings?.subTitle ||
+                "Выберите услугу, которая ближе к вашему формату события"}
+            </span>
           </span>
         </Title>
       </div>
-      <div className="overflow-x-auto w-auto max-md:px-[19px]  services-box">
-        <div className="flex min-w-[1499px] max-2xl:max-w-[1350px] max-2xl:min-w-[1349px] services-box  justify-stretch w-full">
+
+      {/* Навигация по услугам */}
+      <div className="overflow-x-auto w-auto max-md:px-[19px] services-box">
+        <div className="flex min-w-[1499px] max-2xl:max-w-[1350px] max-2xl:min-w-[1349px] services-box justify-stretch w-full">
           {services.map((e, i) => (
             <button
               onClick={() => setActiveService(i)}
               key={i}
-              className={` pb-[19px] max-2xl:text-[15px]  text-[17px] transition-colors duration-300 tracking-[-3%] flex items-start  px-2 text-balance ${
+              className={`pb-[19px] max-2xl:text-[15px] text-[17px] transition-colors duration-300 tracking-[-3%] flex items-start px-2 text-balance ${
                 activeService === i
                   ? "border-b-2 border-orange text-orange"
                   : "border-b text-white/60 border-white/34 cursor-pointer"
@@ -99,17 +119,18 @@ export default function Services() {
         </div>
       </div>
 
-      <div className="pt-[126px]  max-md:pt-[30px] max-md:gap-[25px] max-lg:grid-cols-2 max-md:grid-cols-1 gap-[80px] grid grid-cols-3 ">
+      {/* Контент активной услуги */}
+      <div className="pt-[126px] max-md:pt-[30px] max-md:gap-[25px] max-lg:grid-cols-2 max-md:grid-cols-1 gap-[80px] grid grid-cols-3 ">
         <div className="max-md:px-[19px] gap-[16px] max-md:order-2 flex">
           <div className="min-w-[11px] mt-[14px] max-md:h-[6px] max-md:min-w-[6px] max-md:mt-[9px] h-[11px] bg-orange rounded-full"></div>
-
           <h4 className="text-[37px] max-md:text-[27px] drop-shadow-[0_1.25px_9px_#ffffff78] leading-[106%] tracking-[-4%] text-balance">
             {services[activeService].title}
           </h4>
         </div>
+
         <div className="max-md:px-[19px] max-md:order-3">
           <ul className="max-w-[444px] list-inside mb-[69px] max-md:mb-[53px] flex flex-col gap-[20px] list-disc">
-            {services[activeService].desc?.map((item: string, idx: number) => (
+            {services[activeService].desc?.map((item, idx) => (
               <li
                 className="text-[17px]! max-md:text-[15px]! text-white/77 leading-[131%]! tracking-[-3%]!"
                 key={idx}
@@ -119,7 +140,7 @@ export default function Services() {
             ))}
           </ul>
           <div className="flex max-md:hidden gap-y-[9px] gap-x-[3px] flex-wrap">
-            {services[activeService].tags?.map((tag: string, idx: number) => (
+            {services[activeService].tags?.map((tag, idx) => (
               <div
                 className="px-5 py-3 text-[14px] border whitespace-nowrap border-[#323232] rounded-full "
                 key={idx}
@@ -129,11 +150,16 @@ export default function Services() {
             ))}
           </div>
         </div>
+
         <div className="max-md:order-1 relative">
           <div className="flex gap-y-[6px] px-[17px] pb-[13px] md:hidden absolute bottom-0 left-0 w-full gap-x-[4px] flex-wrap">
-            {services[activeService].tags?.map((tag: string, idx: number) => (
+            {services[activeService].tags?.map((tag, idx) => (
               <div
-                className={`px-[14px] py-[9px] text-[14px] max-md:text-[13px] whitespace-nowrap  backdrop-blur-[51px] rounded-full ${services[activeService].imgColor == "light" ? "bg-black/41" : "bg-white/21"}`}
+                className={`px-[14px] py-[9px] text-[14px] max-md:text-[13px] whitespace-nowrap backdrop-blur-[51px] rounded-full ${
+                  services[activeService].imgColor === "light"
+                    ? "bg-black/41"
+                    : "bg-white/21"
+                }`}
                 key={idx}
               >
                 {tag}
@@ -149,12 +175,13 @@ export default function Services() {
           />
         </div>
       </div>
+
       <div className="md:hidden w-full grid grid-cols-2 gap-[6px]">
         <div
           onClick={() => changeActive(-1)}
           className="bg-[#1B1B1B] w-full pr-[41px] flex justify-end items-center h-[53px]"
         >
-          <div className="mask-[url('/images/icons/left-arrow.svg')] mask-center  mask-contain mask-no-repeat bg-orange w-6 h-6" />
+          <div className="mask-[url('/images/icons/left-arrow.svg')] mask-center mask-contain mask-no-repeat bg-orange w-6 h-6" />
         </div>
         <div
           onClick={() => changeActive(1)}

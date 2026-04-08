@@ -1,25 +1,45 @@
 import { defineField, defineType } from "sanity";
 
-const pricing = defineType({
-  name: "pricing",
-  title: "Тарифы",
+export const pricingSection = defineType({
+  name: "pricingSection",
+  title: "Настройки секции Тарифы",
   type: "document",
   fields: [
     defineField({
-      name: "title",
-      title: "Название тарифа",
+      name: "sectionIndex",
+      title: "Индекс",
       type: "string",
+      initialValue: "[05] ",
     }),
     defineField({
-      name: "price",
-      title: "Цена",
+      name: "sectionTitle",
+      title: "Заголовок",
       type: "string",
+      initialValue: "Тарифы",
     }),
     defineField({
-      name: "term",
-      title: "Срок выполнения",
+      name: "mainTitle",
+      title: "Главный заголовок",
       type: "string",
+      initialValue: "Выбирайте формат под задачу",
     }),
+    defineField({
+      name: "description",
+      title: "Описание",
+      type: "text",
+      rows: 3,
+    }),
+  ],
+});
+
+export const pricing = defineType({
+  name: "pricing",
+  title: "Тарифы (контент)",
+  type: "document",
+  fields: [
+    defineField({ name: "title", title: "Название тарифа", type: "string" }),
+    defineField({ name: "price", title: "Цена", type: "string" }),
+    defineField({ name: "term", title: "Срок выполнения", type: "string" }),
     defineField({
       name: "description",
       title: "Краткое описание",
@@ -43,6 +63,12 @@ const pricing = defineType({
       title: "Светлая тема",
       type: "boolean",
       initialValue: false,
+    }),
+    defineField({
+      name: "button",
+      type: "string",
+      title: "Кнопка",
+      initialValue: "Обсудить проект",
     }),
     defineField({
       name: "mainServices",
@@ -105,21 +131,13 @@ const pricing = defineType({
         },
       ],
     }),
-    defineField({
-      name: "bonus",
-      title: "Текст бонуса",
-      type: "string",
-    }),
+    defineField({ name: "bonus", title: "Текст бонуса", type: "string" }),
     defineField({
       name: "footerNote",
       title: "Примечание внизу",
       type: "string",
     }),
-    defineField({
-      name: "order",
-      title: "Порядок сортировки",
-      type: "number",
-    }),
+    defineField({ name: "order", title: "Порядок сортировки", type: "number" }),
   ],
   orderings: [
     {
@@ -129,5 +147,3 @@ const pricing = defineType({
     },
   ],
 });
-
-export default pricing;

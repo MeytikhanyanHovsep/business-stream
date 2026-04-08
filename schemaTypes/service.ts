@@ -1,15 +1,12 @@
 import { defineField, defineType } from "sanity";
 
-const service = defineType({
+// Схема отдельной услуги (чтобы старые данные вернулись)
+export const service = defineType({
   name: "service",
-  title: "Услуги",
+  title: "Услуги (контент)",
   type: "document",
   fields: [
-    defineField({
-      name: "title",
-      title: "Название услуги",
-      type: "string",
-    }),
+    defineField({ name: "title", title: "Название услуги", type: "string" }),
     defineField({
       name: "desc",
       title: "Описание (список строк)",
@@ -42,12 +39,39 @@ const service = defineType({
       },
       initialValue: "light",
     }),
-    defineField({
-      name: "order",
-      title: "Порядок (1, 2, 3...)",
-      type: "number",
-    }),
+    defineField({ name: "order", title: "Порядок", type: "number" }),
   ],
 });
 
-export default service;
+// Схема настроек секции (заголовки)
+export const servicesSection = defineType({
+  name: "servicesSection",
+  title: "Настройки секции Услуги",
+  type: "document",
+  fields: [
+    defineField({
+      name: "sectionIndex",
+      title: "Индекс",
+      type: "string",
+      initialValue: "[04] ",
+    }),
+    defineField({
+      name: "sectionTitle",
+      title: "Заголовок",
+      type: "string",
+      initialValue: "Услуги",
+    }),
+    defineField({
+      name: "mainTitle",
+      title: "Главный заголовок",
+      type: "text",
+      rows: 2,
+    }),
+    defineField({
+      name: "subTitle",
+      title: "Подзаголовок",
+      type: "text",
+      rows: 2,
+    }),
+  ],
+});

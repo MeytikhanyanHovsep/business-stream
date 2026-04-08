@@ -18,6 +18,8 @@ interface HeroData {
   titleLine2: string;
   subtitle: string;
   videoUrl?: string;
+  heroButton: string;
+  heroButton2: string;
 }
 
 export default function Hero() {
@@ -36,7 +38,9 @@ export default function Hero() {
           titleLine1,
           titleLine2,
           subtitle,
-          "videoUrl": video.asset->url
+          "videoUrl": video.asset->url,
+          heroButton,
+          heroButton2,
         }`);
         setData(res);
       } catch (error) {
@@ -113,14 +117,14 @@ export default function Hero() {
           </p>
           <div className="flex max-sm:w-full max-sm:flex-col gap-[10px] mt-[34px]">
             <Button modal="discuss" hasDetails={true} style="max-sm:min-w-full">
-              Обсудить проект
+              {data?.heroButton || "Обсудить проект"}
             </Button>
             <Button
               modal="audit"
               type="transparent"
               style="w-[184px] max-sm:min-w-full"
             >
-              Live-аудит
+              {data?.heroButton2 || "Live-аудит"}
             </Button>
           </div>
         </div>

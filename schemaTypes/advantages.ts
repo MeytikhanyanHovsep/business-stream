@@ -1,28 +1,55 @@
 import { defineField, defineType } from "sanity";
 
 export default defineType({
-  name: "advantage",
+  name: "advantagesSection",
   title: "Преимущества",
   type: "document",
   fields: [
     defineField({
-      name: "title",
-      title: "Заголовок",
+      name: "sectionIndex",
+      title: "Индекс секции",
       type: "string",
-      validation: (Rule) => Rule.required(),
+      initialValue: "[02] ",
     }),
     defineField({
-      name: "desc",
-      title: "Описание",
+      name: "sectionTitle",
+      title: "Заголовок (маленький)",
+      type: "string",
+      initialValue: "Преимущества",
+    }),
+    defineField({
+      name: "mainTitle",
+      title: "Главный заголовок",
+      type: "string",
+    }),
+    defineField({
+      name: "titleDescription",
+      title: "Описание в заголовке",
       type: "text",
-      rows: 3,
-      validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "order",
-      title: "Порядок",
-      type: "number",
-      initialValue: 0,
+      name: "leftTopText",
+      title: "Текст сверху слева",
+      type: "text",
+    }),
+    defineField({
+      name: "rightTopText",
+      title: "Текст сверху справа",
+      type: "text",
+    }),
+    defineField({
+      name: "items",
+      title: "Список преимуществ (6 штук)",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { name: "title", type: "string", title: "Заголовок" },
+            { name: "desc", type: "text", title: "Описание" },
+          ],
+        },
+      ],
     }),
   ],
 });

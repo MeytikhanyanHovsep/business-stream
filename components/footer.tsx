@@ -9,15 +9,22 @@ const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
   dataset: "production",
   apiVersion: "2026-01-01",
-  useCdn: true,
+  useCdn: false,
 });
 
 interface FooterData {
   title?: string;
+  button?: string;
+  button2?: string;
+  navTitle?: string;
+  contactsTitle?: string;
   phone?: string;
   telegram?: string;
   email?: string;
   address?: string;
+  copyright?: string;
+  policy?: string;
+  menu?: { label: string; target: string }[];
 }
 
 export default function Footer() {
@@ -35,16 +42,18 @@ export default function Footer() {
     fetchFooter();
   }, []);
 
-  const menu = [
-    { label: "Главная", target: "#home" },
-    { label: "Преимущества", target: "#advantages" },
-    { label: "О нас", target: "#about" },
-    { label: "Тарифы", target: "#pricing" },
-    { label: "Кейсы", target: "#cases" },
-    { label: "Отзывы", target: "#reviews" },
-    { label: "FAQ", target: "#faq" },
-    { label: "Контакты", target: "#contacts" },
-  ];
+  const menu = data?.menu?.length
+    ? data.menu
+    : [
+        { label: "Главная", target: "#home" },
+        { label: "Преимущества", target: "#advantages" },
+        { label: "О нас", target: "#about" },
+        { label: "Тарифы", target: "#pricing" },
+        { label: "Кейсы", target: "#cases" },
+        { label: "Отзывы", target: "#reviews" },
+        { label: "FAQ", target: "#faq" },
+        { label: "Контакты", target: "#contacts" },
+      ];
 
   const path = usePathname();
   const lenis = useLenis();
@@ -72,17 +81,17 @@ export default function Footer() {
           </h3>
           <div className="flex max-sm:flex-col gap-[10px]">
             <Button modal="discuss" hasDetails={true} type="white">
-              Обсудить проект
+              {data?.button || "Обсудить проект"}
             </Button>
             <Button modal="reels" type="transparent">
-              Получить Reels в подарок
+              {data?.button2 || "Получить Reels в подарок"}
             </Button>
           </div>
         </div>
         <div className="flex max-2xl:gap-[100px] max-sm:gap-[40px] max-sm:justify-between gap-[238px]">
           <ul className="flex flex-col max-md:gap-[19px] gap-[11px]">
             <li className="mb-[13px] uppercase text-orange text-[15px] font-semibold">
-              Навигация
+              {data?.navTitle || "Навигация"}
             </li>
             {menu.map((e, i) => (
               <li key={i}>
@@ -98,7 +107,7 @@ export default function Footer() {
 
           <ul className="flex flex-col max-md:gap-[19px] gap-[11px]">
             <li className="mb-[13px] uppercase text-orange text-[15px] font-semibold">
-              контакты
+              {data?.contactsTitle || "контакты"}
             </li>
             <li className="text-[17px] max-md:opacity-62 max-sm:text-[14px] tracking-[-3%] leading-[137%] uppercase">
               {data?.phone || "7 (911) 000-00-00"}
@@ -117,10 +126,10 @@ export default function Footer() {
       </div>
       <div className="grid gap-[20px] max-sm:gap-2 grid-cols-2 max-md:flex flex-col items-center">
         <p className="text-white/49 max-md:text-white/19 max-sm:text-[13px] leading-[137%] tracking-[-3%] uppercase text-[15px]">
-          © 2026 bussines stream. Все права защищены
+          {data?.copyright || "© 2026 bussines stream. Все права защищены"}
         </p>
         <a className="text-white/49 max-md:text-white/19 max-sm:text-[13px] leading-[137%] underline tracking-[-3%] uppercase text-[15px]">
-          политика конфиденциальности
+          {data?.policy || "политика конфиденциальности"}
         </a>
       </div>
     </footer>

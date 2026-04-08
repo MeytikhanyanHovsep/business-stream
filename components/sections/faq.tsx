@@ -18,20 +18,32 @@ interface FaqItem {
   answer: string;
 }
 
+interface FaqPageData {
+  settings: {
+    sectionIndex?: string;
+    sectionTitle?: string;
+    mainTitle?: string;
+  };
+  items: FaqItem[];
+}
+
 export default function Faq() {
-  const [faqData, setFaqData] = useState<FaqItem[]>([]);
+  const [pageData, setPageData] = useState<FaqPageData | null>(null);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchFaq = async () => {
       try {
         const data = await client.fetch(
-          `*[_type == "faq"] | order(order asc) {
-            question,
-            answer
+          `{
+            "settings": *[_type == "faqSection"][0],
+            "items": *[_type == "faq"] | order(order asc) {
+              question,
+              answer
+            }
           }`,
         );
-        setFaqData(data);
+        setPageData(data);
       } catch (error) {
         console.error("Sanity fetch error:", error);
       }
@@ -40,19 +52,28 @@ export default function Faq() {
     fetchFaq();
   }, []);
 
+  if (!pageData) return null;
+
+  const { settings, items } = pageData;
+
   return (
     <section id="faq" className="pt-[245px] max-lg:pt-[83px] container">
-      <Title gap={20} title="FAQ" index="[08] ">
-        Простые ответы на вопросы, которые задают наши клиенты
+      <Title
+        gap={20}
+        title={settings?.sectionTitle || "FAQ"}
+        index={settings?.sectionIndex || "[08] "}
+      >
+        {settings?.mainTitle ||
+          "Простые ответы на вопросы, которые задают наши клиенты"}
       </Title>
       <div className="flex flex-col gap-3">
-        {faqData.map((item, index) => {
+        {items.map((item, index) => {
           const isOpen = openIndex === index;
 
           return (
             <div
               key={index}
-              className="flex flex-col  max-md:p-[20px_15px_17px_18px] px-[26px] py-[23px] bg-[#161616]"
+              className="flex flex-col  max-md:p-[20px_15_17px_18px] px-[26px] py-[23px] bg-[#161616]"
             >
               <div
                 className="cursor-pointer relative max-[1200px]:gap-[30px] max-[1200px]:flex justify-between grid grid-cols-3 items-center"
@@ -67,7 +88,11 @@ export default function Faq() {
                 </h3>
 
                 <div
-                  className={`absolute max-[1200px]:relative transition-all duration-300 will-change-transform origin-center top-0 max-md:min-w-[25px] max-md:h-[25px] min-w-[29px] h-[29px] rounded-full border grid place-items-center right-[2px] ${isOpen ? "bg-white/10 rotate-45 border-white/16" : "bg-orange/15  border-orange"}`}
+                  className={`absolute max-[1200px]:relative transition-all duration-300 will-change-transform origin-center top-0 max-md:min-w-[25px] max-md:h-[25px] min-w-[29px] h-[29px] rounded-full border grid place-items-center right-[2px] ${
+                    isOpen
+                      ? "bg-white/10 rotate-45 border-white/16"
+                      : "bg-orange/15  border-orange"
+                  }`}
                 >
                   <Image
                     src="/images/icons/plus.svg"
@@ -114,38 +139,3 @@ export default function Faq() {
     </section>
   );
 }
-
-// const faqData = [
-//   {
-//     question:
-//       "Я провожу конференцию в Санкт-Петербурге — с чего начать организацию видеосъёмки?",
-//     answer:
-//       "Свяжитесь с нами для обсуждения масштаба мероприятия. Мы поможем составить техническое задание и подберем оптимальный комплект оборудования.",
-//   },
-//   {
-//     question: "Можно ли заказать только онлайн-трансляцию без видеомонтажа?",
-//     answer:
-//       "Да, конечно. Мы проводим прямые эфиры «под ключ» — с графикой, чатом и резервными каналами. Монтаж и нарезки можно добавить по желанию.",
-//   },
-//   {
-//     question: "Сколько стоит видеосъемка мероприятия?",
-//     answer:
-//       "Стоимость зависит от количества камер, персонала и сложности монтажа. Наши базовые пакеты начинаются от 50 000 ₽.",
-//   },
-//   {
-//     question:
-//       "Сколько времени занимает монтаж готового ролика после мероприятия?",
-//     answer:
-//       "Короткие Reels мы отдаем в течение 48 часов, а финальные отчетные ролики — через 5–7 дней после события.",
-//   },
-//   {
-//     question: "Работаете ли вы с некоммерческими организациями и фондами?",
-//     answer:
-//       "Да, у нас есть опыт работы с НКО, мы понимаем специфику отчетности и готовы обсуждать специальные условия.",
-//   },
-//   {
-//     question: "Как понять, какой формат съёмки подойдёт именно моему событию?",
-//     answer:
-//       "Напишите нам, и наш продюсер бесплатно проконсультирует вас, исходя из ваших целей: будь то охваты в соцсетях или архивный отчет.",
-//   },
-// ];

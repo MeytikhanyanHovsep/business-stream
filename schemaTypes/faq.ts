@@ -1,6 +1,32 @@
 import { defineField, defineType } from "sanity";
 
-export default defineType({
+export const faqSection = defineType({
+  name: "faqSection",
+  title: "Настройки секции FAQ",
+  type: "document",
+  fields: [
+    defineField({
+      name: "sectionIndex",
+      title: "Индекс",
+      type: "string",
+      initialValue: "[08] ",
+    }),
+    defineField({
+      name: "sectionTitle",
+      title: "Заголовок",
+      type: "string",
+      initialValue: "FAQ",
+    }),
+    defineField({
+      name: "mainTitle",
+      title: "Главный заголовок",
+      type: "text",
+      rows: 2,
+    }),
+  ],
+});
+
+export const faqItem = defineType({
   name: "faq",
   title: "FAQ",
   type: "document",

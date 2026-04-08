@@ -5,8 +5,8 @@ import Cases from "@/components/sections/cases";
 import Services from "@/components/sections/services";
 import Process from "@/components/sections/process";
 import Faq from "@/components/sections/faq";
-import Quiz from "@/components/sections/quiz";
 import Reviews from "@/components/sections/reviews";
+import Quiz from "@/components/sections/quiz";
 
 export default function Home() {
   return (

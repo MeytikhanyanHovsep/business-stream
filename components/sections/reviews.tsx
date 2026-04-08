@@ -12,7 +12,7 @@ import Image from "next/image";
 import Title from "../ui/title";
 
 interface ReviewData {
-  id: number;
+  id: string; // Изменено на string для Sanity _id
   companyImg?: string;
   text?: string;
   authorName?: string;
@@ -22,70 +22,15 @@ interface ReviewData {
   videoPrev: string;
 }
 
-const reviews: ReviewData[] = [
-  {
-    id: 1,
-    companyImg: "/images/reviews/stoco.png",
-    text: "Мы обратились к команде за организацией видеосъёмки и прямой трансляции корпоративного мероприятия. Работа была выполнена на высоком профессиональном уровне: чёткая подготовка, современное оборудование, качественная картинка и стабильный эфир без сбоев. \n\nОтдельно отмечаем оперативность в коммуникации и умение подстраиваться под требования корпоративного формата. Все материалы были предоставлены вовремя и полностью соответствовали нашим ожиданиям.",
-    authorName: "Андрей Ковалёв",
-    authorDate: "06.05.2025",
-    videoSrc: "/videos/hero-bg.mp4",
-    authorAvatar: "/images/reviews/berserk.png",
-    videoPrev: "/images/reviews/berserk-blur.png",
-  },
-  {
-    id: 2,
-    companyImg: "/images/reviews/tbank.png",
-    text: "Мы обратились к команде за организацией видеосъёмки и прямой трансляции корпоративного мероприятия. Работа была выполнена на высоком профессиональном уровне: чёткая подготовка, современное оборудование, качественная картинка и стабильный эфир без сбоев. \n\nОтдельно отмечаем оперативность в коммуникации и умение подстраиваться под требования корпоративного формата. Все материалы были предоставлены вовремя и полностью соответствовали нашим ожиданиям.",
-    authorName: "Елена Владимирова",
-    authorDate: "06.05.2025",
-    authorAvatar: "/images/reviews/Epihelp.png",
-    videoPrev: "/images/reviews/Epihelp-blur.png",
-    videoSrc: "/videos/hero-bg.mp4",
-  },
-  {
-    id: 3,
-    companyImg: "/images/reviews/gasprom.png",
-    text: "Наша компания сотрудничала с данной командой при проведении крупного корпоративного события, где требовалась профессиональная видеосъёмка и организация онлайн-трансляции. Все работы были выполнены качественно и в строгом соответствии с заранее согласованным планом. Сотрудничество прошло отлично.",
-    authorName: "Андрей Ковалёв",
-    authorDate: "06.05.2025",
-    videoSrc: "/videos/hero-bg.mp4",
-    authorAvatar: "/images/reviews/mipif.png",
-    videoPrev: "/images/reviews/mipif-blur.png",
-  },
-  {
-    id: 4,
-    companyImg: "/images/reviews/stoco.png",
-    text: "Мы обратились к команде за организацию видеосъёмки и прямой трансляции корпоративного мероприятия. Работа была выполнена на высоком профессиональном уровне.",
-    authorName: "Андрей Ковалёв",
-    authorDate: "06.05.2025",
-    videoSrc: "/videos/hero-bg.mp4",
-    authorAvatar: "/images/reviews/berserk.png",
-    videoPrev: "/images/reviews/berserk-blur.png",
-  },
-  {
-    id: 5,
-    companyImg: "/images/reviews/tbank.png",
-    text: "Мы обратились к команде за организацию видеосъёмки и прямой трансляции корпоративного мероприятия. Работа была выполнена на высоком профессиональном уровне.",
-    authorName: "Елена Владимирова",
-    authorDate: "06.05.2025",
-    authorAvatar: "/images/reviews/Epihelp.png",
-    videoPrev: "/images/reviews/Epihelp-blur.png",
-    videoSrc: "/videos/hero-bg.mp4",
-  },
-  {
-    id: 6,
-    companyImg: "/images/reviews/gasprom.png",
-    text: "Наша компания сотрудничала с данной командой при проведении крупного корпоративного события, где требовалась профессиональная видеосъёмка.",
-    authorName: "Андрей Ковалёв",
-    authorDate: "06.05.2025",
-    videoSrc: "/videos/hero-bg.mp4",
-    authorAvatar: "/images/reviews/mipif.png",
-    videoPrev: "/images/reviews/mipif-blur.png",
-  },
-];
+interface ReviewsPageData {
+  settings: {
+    sectionIndex?: string;
+    sectionTitle?: string;
+    mainTitle?: string;
+  };
+  items: ReviewData[];
+}
 
-const TOTAL = reviews.length;
 const BASE_OFFSET = 72;
 const ITEM_WIDTH = 64;
 
@@ -97,30 +42,33 @@ const client = createClient({
 });
 
 export default function ReviewsSlider() {
-  const [data, setData] = useState<ReviewData[] | null>(null);
+  const [pageData, setPageData] = useState<ReviewsPageData | null>(null);
 
   const swiperRef = useRef<SwiperType | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [playingVideoId, setPlayingVideoId] = useState<number | null>(null);
+  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const videoRefs = useRef<Map<number, HTMLVideoElement>>(new Map());
+  const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await client.fetch(
-          `*[_type == "review"] | order(order asc) {
-            "id": _id,
-            "companyImg": companyImg.asset->url,
-            text,
-            authorName,
-            authorDate,
-            "authorAvatar": authorAvatar.asset->url,
-            "videoSrc": video.asset->url,
-            "videoPrev": videoPrev.asset->url
+          `{
+            "settings": *[_type == "reviewsSection"][0],
+            "items": *[_type == "review"] | order(order asc) {
+              "id": _id,
+              "companyImg": companyImg.asset->url,
+              text,
+              authorName,
+              authorDate,
+              "authorAvatar": authorAvatar.asset->url,
+              "videoSrc": videoSrc.asset->url,
+              "videoPrev": videoPrev.asset->url
+            }
           }`,
         );
-        setData(res);
+        setPageData(res);
       } catch (error) {
         console.error("Sanity fetch error:", error);
       }
@@ -135,9 +83,13 @@ export default function ReviewsSlider() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  if (!pageData || pageData.items.length === 0) return null;
+
+  const { settings, items } = pageData;
+  const TOTAL = items.length;
   const counter = BASE_OFFSET + activeIndex;
 
-  const handlePlayPause = async (id: number) => {
+  const handlePlayPause = async (id: string) => {
     const video = videoRefs.current.get(id);
     if (!video) return;
     try {
@@ -174,8 +126,13 @@ export default function ReviewsSlider() {
       id="reviews"
       className="container pt-[247px] max-lg:pt-[82px] overflow-hidden"
     >
-      <Title gap={35} title="отзывы" index="[07] ">
-        Нам доверяют события, где важны эмоции и репутация
+      <Title
+        gap={35}
+        title={settings?.sectionTitle || "отзывы"}
+        index={settings?.sectionIndex ? settings.sectionIndex : "[07] "}
+      >
+        {settings?.mainTitle ||
+          "Нам доверяют события, где важны эмоции и репутация"}
       </Title>
 
       <div className="w-full">
@@ -200,115 +157,114 @@ export default function ReviewsSlider() {
             stopAllVideos();
           }}
         >
-          {data &&
-            data.map((review, index) => (
-              <SwiperSlide
-                key={review.id}
-                className="h-auto! flex perspective-[1000px]"
+          {items.map((review, index) => (
+            <SwiperSlide
+              key={review.id}
+              className="h-auto! flex perspective-[1000px]"
+            >
+              <motion.div
+                className="relative w-full h-full transform-3d cursor-pointer"
+                initial={false}
+                animate={{
+                  rotateY: isMobile ? 180 : activeIndex === index ? 180 : 0,
+                }}
+                transition={{ duration: 0.6, bounce: 0 }}
+                onClick={() =>
+                  activeIndex === index && handlePlayPause(review.id)
+                }
               >
-                <motion.div
-                  className="relative w-full h-full transform-3d cursor-pointer"
-                  initial={false}
-                  animate={{
-                    rotateY: isMobile ? 180 : activeIndex === index ? 180 : 0,
-                  }}
-                  transition={{ duration: 0.6, bounce: 0 }}
-                  onClick={() =>
-                    activeIndex === index && handlePlayPause(review.id)
-                  }
-                >
-                  <div className="h-full! w-full border border-[#555555] pt-[34px] pl-[30px] pb-[60px] pr-[53px] gap-[60px] max-md:gap-10 max-md:p-5 flex flex-col justify-start bg-[#0a0a0a] backface-hidden">
-                    <Image
-                      width={95}
-                      height={60}
-                      src={review.companyImg || ""}
-                      alt="company"
-                      className="w-[95px] h-min object-contain"
-                    />
-                    <p className="text-[#a1a1a1] whitespace-pre-wrap text-sm md:text-base leading-[131%] tracking-[-3%]">
-                      {review.text}
-                    </p>
-                    <div className="flex items-center gap-4 mt-auto">
-                      <div className="w-[34px] h-[34px] rounded-full bg-gray-800 overflow-hidden shrink-0">
-                        <Image
-                          width={40}
-                          height={40}
-                          src={review.authorAvatar || ""}
-                          alt={review.authorName || ""}
-                          className="w-[34px] h-[34px] object-cover"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-white text-[15px] tracking-[-3%] leading-[131%]">
-                          {review.authorName}
-                        </div>
-                        <div className="text-white/54 text-[13px] tracking-[-3%] leading-[131%] mt-0.5">
-                          {review.authorDate}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="absolute inset-0 w-full h-full md:min-h-[534px] overflow-hidden group backface-hidden transform-[rotateY(180deg)]">
-                    <div className="flex items-center h-full w-full relative justify-center">
+                <div className="h-full! w-full border border-[#555555] pt-[34px] pl-[30px] pb-[60px] pr-[53px] gap-[60px] max-md:gap-10 max-md:p-5 flex flex-col justify-start bg-[#0a0a0a] backface-hidden">
+                  <Image
+                    width={95}
+                    height={60}
+                    src={review.companyImg || ""}
+                    alt="company"
+                    className="w-[95px] h-min object-contain"
+                  />
+                  <p className="text-[#a1a1a1] whitespace-pre-wrap text-sm md:text-base leading-[131%] tracking-[-3%]">
+                    {review.text}
+                  </p>
+                  <div className="flex items-center gap-4 mt-auto">
+                    <div className="w-[34px] h-[34px] rounded-full bg-gray-800 overflow-hidden shrink-0">
                       <Image
-                        alt="Bg"
-                        width={500}
-                        height={500}
-                        className="absolute -z-1 w-full h-full blur-[70px]"
-                        src={review.videoPrev}
+                        width={40}
+                        height={40}
+                        src={review.authorAvatar || ""}
+                        alt={review.authorName || ""}
+                        className="w-[34px] h-[34px] object-cover"
                       />
-                      <video
-                        ref={(el) => {
-                          if (el) videoRefs.current.set(review.id, el);
-                          else videoRefs.current.delete(review.id);
-                        }}
-                        className="absolute inset-0 w-full h-full object-contain"
-                        preload="metadata"
-                        playsInline
-                        loop
-                        onEnded={() => setPlayingVideoId(null)}
-                      >
-                        <source src={review.videoSrc} type="video/mp4" />
-                      </video>
-                      <div
-                        className={`absolute inset-0 bg-black/20 transition-opacity duration-500 ${playingVideoId === review.id ? "opacity-0" : "opacity-100"}`}
-                      />
-                      <div
-                        className={`relative z-10 rounded-full flex items-center justify-center transition-all duration-300 ${playingVideoId === review.id ? "opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100" : "opacity-100 scale-100 group-hover:scale-110"}`}
-                      >
-                        <div
-                          className={`w-[93px] h-[93px] bg-white/45 backdrop-blur-[14px] rounded-full flex items-center justify-center ${playingVideoId === review.id ? "" : "pl-1"}`}
-                        >
-                          {playingVideoId === review.id ? (
-                            <svg
-                              width="30"
-                              height="30"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                            >
-                              <path
-                                d="M6 19H10V5H6V19ZM14 5V19H18V5H14Z"
-                                fill="#fff"
-                              />
-                            </svg>
-                          ) : (
-                            <svg
-                              width="30"
-                              height="30"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                            >
-                              <path d="M8 5V19L19 12L8 5Z" fill="#fff" />
-                            </svg>
-                          )}
-                        </div>
+                    </div>
+                    <div>
+                      <div className="text-white text-[15px] tracking-[-3%] leading-[131%]">
+                        {review.authorName}
+                      </div>
+                      <div className="text-white/54 text-[13px] tracking-[-3%] leading-[131%] mt-0.5">
+                        {review.authorDate}
                       </div>
                     </div>
                   </div>
-                </motion.div>
-              </SwiperSlide>
-            ))}
+                </div>
+
+                <div className="absolute inset-0 w-full h-full md:min-h-[534px] overflow-hidden group backface-hidden transform-[rotateY(180deg)]">
+                  <div className="flex items-center h-full w-full relative justify-center">
+                    <Image
+                      alt="Bg"
+                      width={500}
+                      height={500}
+                      className="absolute -z-1 w-full h-full blur-[70px]"
+                      src={review.videoPrev}
+                    />
+                    <video
+                      ref={(el) => {
+                        if (el) videoRefs.current.set(review.id, el);
+                        else videoRefs.current.delete(review.id);
+                      }}
+                      className="absolute inset-0 w-full h-full object-contain"
+                      preload="metadata"
+                      playsInline
+                      loop
+                      onEnded={() => setPlayingVideoId(null)}
+                    >
+                      <source src={review.videoSrc} type="video/mp4" />
+                    </video>
+                    <div
+                      className={`absolute inset-0 bg-black/20 transition-opacity duration-500 ${playingVideoId === review.id ? "opacity-0" : "opacity-100"}`}
+                    />
+                    <div
+                      className={`relative mt-[-20px] z-10 rounded-full flex items-center justify-center transition-all duration-300 ${playingVideoId === review.id ? "opacity-0 scale-90 group-hover:opacity-100 group-hover:scale-100" : "opacity-100 scale-100 group-hover:scale-110"}`}
+                    >
+                      <div
+                        className={`w-[93px] h-[93px] bg-white/45 backdrop-blur-[14px] rounded-full flex items-center justify-center ${playingVideoId === review.id ? "" : "pl-1"}`}
+                      >
+                        {playingVideoId === review.id ? (
+                          <svg
+                            width="30"
+                            height="30"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <path
+                              d="M6 19H10V5H6V19ZM14 5V19H18V5H14Z"
+                              fill="#fff"
+                            />
+                          </svg>
+                        ) : (
+                          <svg
+                            width="30"
+                            height="30"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                          >
+                            <path d="M8 5V19L19 12L8 5Z" fill="#fff" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </SwiperSlide>
+          ))}
         </Swiper>
       </div>
 
