@@ -33,7 +33,7 @@ export default function About() {
         </div>
       </main>
       <AboutPage />
-      <Projects />
+      {/* <Projects /> */}
       <Gallery />
     </>
   );
