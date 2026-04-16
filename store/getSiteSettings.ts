@@ -9,19 +9,14 @@ const client = createClient({
 
 export async function getSiteSettings() {
   return await client.fetch(
-    `*[_type == "settings"][0]{
+    `*[_type == "siteSettings" && _id == "siteSettings"][0]{
 ...,
-    title,
-    description,
     "faviconUrl": favicon.asset->url,
     "ogImageUrl": ogImage.asset->url,
-    headScripts,
-    bodyScripts,
-    robotsText,
   }`,
     {},
     {
-      next: { revalidate: 60 },
+      next: { revalidate: 0 },
     },
   );
 }

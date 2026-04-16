@@ -72,8 +72,8 @@ export default defineConfig({
                       .id("footer")
                       .title("Подвал"),
                     S.documentListItem()
-                      .schemaType("settings")
-                      .id("settings")
+                      .schemaType("siteSettings")
+                      .id("siteSettings")
                       .title("SEO / Настройки"),
                   ]),
               ),

@@ -6,10 +6,10 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
-
   return {
     title: settings?.title || "Default Title",
     description: settings?.description || "Default Description",
+    keywords: settings?.keywords || "keywords",
     icons: {
       icon: settings?.faviconUrl || "/favicon.ico",
     },
@@ -27,6 +27,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const settings = await getSiteSettings();
+  console.log(settings);
   return (
     <html
       lang="ru"

@@ -45,7 +45,13 @@ async function getModalsData(): Promise<any> {
     }
   }`;
   try {
-    return await client.fetch(query);
+    return await client.fetch(
+      query,
+      {},
+      {
+        next: { revalidate: 0 },
+      },
+    );
   } catch (error) {
     console.error("Sanity Modals Fetch Error:", error);
     return null;
@@ -135,7 +141,7 @@ async function getPageData(slug: string): Promise<PageData | null> {
     query,
     { slug },
     {
-      next: { revalidate: 60 },
+      next: { revalidate: 0 },
     },
   );
 }

@@ -1,7 +1,7 @@
 import { defineField, defineType } from "sanity";
 
 export default defineType({
-  name: "settings",
+  name: "siteSettings",
   title: "Настройки сайта",
   type: "document",
   fields: [
@@ -18,6 +18,13 @@ export default defineType({
       rows: 3,
     }),
     defineField({
+      name: "keywords",
+      title: "Keywords (SEO)",
+      type: "text",
+      description: "Ключевые слова через запятую (для Google/Yandex)",
+    }),
+
+    defineField({
       name: "favicon",
       title: "Фавикон",
       type: "image",
@@ -29,6 +36,7 @@ export default defineType({
       type: "image",
       description: "Рекомендуемый размер 1200x630",
     }),
+
     defineField({
       name: "headScripts",
       title: "Скрипты в <head>",

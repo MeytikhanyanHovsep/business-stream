@@ -6,7 +6,7 @@ import { faqItem, faqSection } from "./faq";
 import footer from "./footer";
 import header from "./header";
 import hero from "./hero";
-import settings from "./settings";
+import siteSettings from "./siteSettings";
 import { pricing, pricingSection } from "./pricing";
 import { reviewItem, reviewsSection } from "./reviews";
 import { service, servicesSection } from "./service";
@@ -36,7 +36,7 @@ export const schemaTypes = [
   faqSection,
   faqItem,
   footer,
-  settings,
+  siteSettings,
   modalContact,
   modalDiscuss,
   modalReels,
