@@ -26,9 +26,9 @@ export interface SanitySection {
 }
 
 interface PageData {
-  headerData: any;
+  headerConfig: any;
   sections: SanitySection[];
-  footerData: any;
+  footerConfig: any;
 }
 
 async function getModalsData(): Promise<any> {
@@ -52,21 +52,23 @@ async function getModalsData(): Promise<any> {
   }
 }
 
+// "headerData": headerConfig->{
+//     ...,
+//     "logoUrl": logo.asset->url
+//   },
+//   "footerData": footerConfig->{
+//     ...,
+//     "menu": menu[] {
+//       label,
+//       "target": target
+//     }
+//   },
+
 async function getPageData(slug: string): Promise<PageData | null> {
   const query = `*[_type == "page" && slug.current == $slug][0]{
-  ...,
-  "headerData": headerConfig->{
-        ...,
-        "logoUrl": logo.asset->url
-      },
-        "footerData": footerConfig->{
-    ...,
-    menu[] {
-      label,
-      target
-    }
-  },
-  
+ ...,
+  headerConfig->,
+  footerConfig->,
   "sections": sections[]->{ 
     ...,
     _type == "quiz" => {
@@ -142,10 +144,11 @@ export default async function Home() {
   const advantagesData = data.sections.find(
     (s) => s._type === "advantagesSection",
   );
+  console.log(data);
 
   return (
     <>
-      <Header data={data.headerData} />
+      <Header data={data.headerConfig} />
       {data.sections.map((section, index) => {
         const sectionKey = section._key || `${section._type}-${index}`;
         switch (section._type) {
@@ -178,7 +181,7 @@ export default async function Home() {
         }
       })}
       <Modals data={modalsData} />
-      <Footer data={data.footerData} />
+      <Footer data={data.footerConfig} />
     </>
   );
 }

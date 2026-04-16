@@ -35,7 +35,7 @@ export default function Header({ data, dataButtons }: HeaderProps) {
   const path = usePathname();
   const lenis = useLenis();
   const [activeSection, setActiveSection] = useState<string>("home");
-
+  console.log("data", data);
   const currentMenu: MenuItem[] = data?.menu?.length
     ? data.menu
     : [
