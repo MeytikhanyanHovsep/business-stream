@@ -190,7 +190,7 @@ export default function Header({ data, dataButtons }: HeaderProps) {
       </AnimatePresence>
     </>
   ) : (
-    <header className="fixed w-full top-0 z-10 bg-[rgba(10,10,10,0.92)] backdrop-blur-[16px] border-b border-[rgba(255,255,255,0.07)] py-[18px]">
+    <header className="fixed w-full top-0 z-10 bg-[rgba(10,10,10,0.92)] backdrop-blur-lg border-b border-[rgba(255,255,255,0.07)] py-[18px]">
       <div
         className="max-width-[800px] mx-auto px-6 flex items-center justify-between gap-4"
         style={{ maxWidth: "800px" }}
@@ -214,7 +214,7 @@ export default function Header({ data, dataButtons }: HeaderProps) {
         >
           <svg
             viewBox="0 0 14 14"
-            className="w-[14px] h-[14px] stroke-current stroke-[2] stroke-linecap-round stroke-linejoin-round fill-none"
+            className="w-[14px] h-[14px] stroke-current stroke-2 stroke-linecap-round stroke-linejoin-round fill-none"
           >
             <path d="M9 2L4 7l5 5" />
           </svg>

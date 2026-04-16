@@ -10,7 +10,7 @@ const client = createClient({
 export async function GET() {
   try {
     const data = await client.fetch(
-      `*[_id == "settings"][0]{robotsText}`,
+      `*[_type == "siteSettings" && _id == "siteSettings"][0]{robotsText}`,
       {},
       { next: { revalidate: 0 } },
     );
