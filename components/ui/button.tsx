@@ -30,7 +30,7 @@ export default function Button({
     transparent:
       "text-white hover:text-black hover:bg-white bg-white/15 backdrop-blur-[44px]",
     orange: "bg-orange text-white hover:text-dark hover:bg-white",
-    black: "bg-dark text-white hover:bg-orange hover:text-white",
+    black: "bg-[#161616] text-white hover:bg-orange hover:text-white",
   };
 
   const lenis = useLenis();

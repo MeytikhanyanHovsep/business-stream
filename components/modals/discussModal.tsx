@@ -1,13 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useModalStore } from "@/store/useModalStore";
 import Link from "next/link";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
-const DiscussModal = () => {
+const DiscussModal = ({ data }: { data?: any }) => {
   const { activeModal, tariffName, closeModal } = useModalStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [isPolicyChecked, setIsPolicyChecked] = useState(true);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [formData, setFormData] = useState({
     fio: "",
@@ -26,6 +33,9 @@ const DiscussModal = () => {
     if (activeModal === null) {
       const timer = setTimeout(() => {
         setIsSubmitted(false);
+        setIsSending(false);
+        setFile(null);
+        setIsDragging(false);
         setFormData({ fio: "", email: "", phone: "", description: "" });
         setErrors({ fio: false, email: false, phone: false });
       }, 300);
@@ -35,23 +45,95 @@ const DiscussModal = () => {
 
   if (activeModal !== "discuss") return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors = {
       fio: formData.fio.trim().length < 2,
-      email: !formData.email.includes("@"),
-      phone: formData.phone.trim().length < 10,
+      email: !validateEmail(formData.email),
+      phone: formData.phone.replace(/\D/g, "").length < 8,
     };
     setErrors(newErrors);
 
-    if (!Object.values(newErrors).some(Boolean) && isPolicyChecked) {
-      setIsSubmitted(true);
+    if (
+      !newErrors.fio &&
+      !newErrors.email &&
+      !newErrors.phone &&
+      isPolicyChecked
+    ) {
+      setIsSending(true);
+
+      const submissionData = new FormData();
+      submissionData.append("fio", formData.fio);
+      submissionData.append("email", formData.email);
+      submissionData.append("phone", formData.phone);
+      submissionData.append("description", formData.description);
+      console.log(tariffName);
+      submissionData.append("tariffInfo", tariffName);
+      submissionData.append("formType", "Обсудить проект");
+      submissionData.append("_subject", `Обсуждение проекта: ${formData.fio}`);
+
+      if (file) {
+        submissionData.append("upload", file);
+      }
+
+      try {
+        const response = await fetch(`https://formspree.io/f/mgoroyez`, {
+          method: "POST",
+          body: submissionData,
+          headers: {
+            Accept: "application/json",
+          },
+        });
+
+        if (response.ok) {
+          setIsSubmitted(true);
+        } else {
+          const errorData = await response.json();
+          console.error("Formspree error:", errorData);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsSending(false);
+      }
     }
   };
 
   if (isSubmitted) {
     return (
-      <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-500 flex items-center justify-center p-4">
         <div
           className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
           onClick={closeModal}
@@ -82,9 +164,12 @@ const DiscussModal = () => {
               />
             </svg>
           </div>
-          <h2 className="text-[24px] text-white mb-2">Спасибо!</h2>
+          <h2 className="text-[24px] text-white mb-2">
+            {data?.successTitle || "Спасибо!"}
+          </h2>
           <p className="text-white/50 text-[14px]">
-            Мы изучим ваш проект и свяжемся с вами в течение 2 часов.
+            {data?.successSubtitle ||
+              "Мы изучим ваш проект и свяжемся с вами в течение 2 часов."}
           </p>
         </div>
       </div>
@@ -92,200 +177,293 @@ const DiscussModal = () => {
   }
 
   return (
-    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 overflow-y-auto">
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
-        onClick={closeModal}
-      />
-      <div className="relative w-full max-w-[538px] bg-[#0D0E13] rounded-2xl border border-white/10 px-5 pb-6 pt-7 md:p-10 md:pb-9 shadow-2xl my-auto">
-        <button
+    <>
+      <style>{`
+        .react-tel-input .form-control {
+          width: 100% !important;
+          background: #1c1c1f !important;
+          border: none !important;
+          border-radius: 8px !important;
+          padding: 13px 16px 13px 48px !important;
+          color: white !important;
+          height: auto !important;
+          font-family: inherit !important;
+          font-size: 16px !important;
+        }
+        .react-tel-input .form-control:focus {
+          outline: none !important;
+          box-shadow: none !important;
+        }
+        .react-tel-input .flag-dropdown {
+          background: transparent !important;
+          border: none !important;
+          border-radius: 8px 0 0 8px !important;
+        }
+        .react-tel-input .selected-flag {
+          background: transparent !important;
+          padding: 0 0 0 12px !important;
+          width: 40px !important;
+        }
+        .react-tel-input .selected-flag:hover,
+        .react-tel-input .selected-flag:focus {
+          background: transparent !important;
+        }
+        .react-tel-input .country-list {
+          background: #1c1c1f !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          border-radius: 8px !important;
+          color: white !important;
+          margin-top: 4px !important;
+        }
+        .react-tel-input .country-list .country:hover,
+        .react-tel-input .country-list .country.highlight {
+          background: rgba(255, 255, 255, 0.05) !important;
+        }
+        .react-tel-input .country-list .search {
+          background: #1c1c1f !important;
+        }
+        .react-tel-input .country-list .search-box {
+          background: #1c1c1f !important;
+          color: white !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+      `}</style>
+
+      <div className="fixed inset-0 z-500 flex items-center justify-center p-4 overflow-y-auto">
+        <div
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
           onClick={closeModal}
-          className="absolute top-6 right-6 text-[#ffffffa6] hover:text-white cursor-pointer transition-colors p-1"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M18 6L6 18M6 6L18 18"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-
-        <div className="mb-7">
-          {/* Блок тарифа (отображается только если передан tariffName) */}
-          {tariffName && (
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-orange/30 mb-4">
-              <div className="w-4 h-4 flex items-center justify-center">
-                <svg width="10" height="8" viewBox="0 0 12 9" fill="none">
-                  <path
-                    d="M1 4L4.5 7.5L11 1"
-                    stroke="#FB4114"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <span className="text-[10px] my-auto md:text-[11px] text-white uppercase tracking-wider">
-                Тариф:{" "}
-                <span className="text-orange  font-medium">{tariffName}</span>
-              </span>
-            </div>
-          )}
-
-          <h2 className="text-[20px] md:text-[24px] text-white mb-2 tracking-tight">
-            Обсудить проект
-          </h2>
-          <p className="text-white/50 text-[14px] leading-relaxed">
-            Расскажите о вашем мероприятии — мы предложим оптимальное решение
-          </p>
-        </div>
-
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          <div className="space-y-[6px]">
-            <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
-              ФИО
-            </label>
-            <input
-              type="text"
-              placeholder="Иванов Иван Иванович"
-              value={formData.fio}
-              onChange={(e) =>
-                setFormData({ ...formData, fio: e.target.value })
-              }
-              className={`w-full bg-[#1c1c1f] border rounded-[8px] px-4 py-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors ${errors.fio ? "border-[#FB4114]" : "border-white/5 focus:border-white"}`}
-            />
-          </div>
-
-          <div className="space-y-[6px]">
-            <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
-              Email
-            </label>
-            <input
-              type="email"
-              placeholder="example@mail.ru"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              className={`w-full bg-[#1c1c1f] border rounded-[8px] px-4 py-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors ${errors.email ? "border-[#FB4114]" : "border-white/5 focus:border-white"}`}
-            />
-          </div>
-
-          <div className="space-y-[6px]">
-            <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
-              Телефон
-            </label>
-            <input
-              type="tel"
-              placeholder="+7 (___) ___-__-__"
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-              className={`w-full bg-[#1c1c1f] border rounded-[8px] px-4 py-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors ${errors.phone ? "border-[#FB4114]" : "border-white/5 focus:border-white"}`}
-            />
-          </div>
-
-          <div className="space-y-[6px]">
-            <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
-              Описание проекта
-            </label>
-            <textarea
-              placeholder="Расскажите о вашем мероприятии: формат, место, дата, задачи..."
-              rows={3}
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              className="w-full bg-[#1c1c1f] border border-white/5 rounded-[8px] px-4 py-[13px] text-white placeholder:text-white/20 focus:outline-none focus:border-white transition-colors resize-none"
-            />
-          </div>
-
-          <div className="space-y-[6px]">
-            <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
-              Техническое задание{" "}
-              <span className="opacity-40">(необязательно)</span>
-            </label>
-            <div className="w-full border-2 border-dashed border-white/10 rounded-[8px] p-6 flex flex-col items-center justify-center bg-[#1c1c1f]/30 cursor-pointer hover:border-white/20 transition-colors">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                className="mb-2 text-white/40"
-              >
-                <path
-                  d="M10 4V16M4 10H16"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <p className="text-[12px] text-white/40 text-center">
-                Перетащите файлы или{" "}
-                <span className="text-[#FB4114] underline">выберите</span>
-              </p>
-              <p className="text-[10px] text-white/20 mt-1">
-                PDF, Word, Excel, изображения — до 20 МБ
-              </p>
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-2 items-start">
-            <div className="relative flex items-center justify-center mt-[2px]">
-              <input
-                type="checkbox"
-                id="policy-discuss"
-                checked={isPolicyChecked}
-                onChange={() => setIsPolicyChecked(!isPolicyChecked)}
-                className="peer h-5 w-5 shrink-0 appearance-none rounded border border-white/10 bg-[#1c1c1f] checked:border-[#FB4114] transition-all cursor-pointer"
-              />
-              <div className="absolute pointer-events-none text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
-                  <path
-                    d="M1 4L4.5 7.5L11 1"
-                    stroke="#FB4114"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            </div>
-            <label
-              htmlFor="policy-discuss"
-              className="text-[11px] leading-[1.4] text-[#ffffff73] cursor-pointer select-none"
-            >
-              Отправляя заявку, вы соглашаетесь с{" "}
-              <Link
-                href="/privacy"
-                className="underline hover:text-white cursor-pointer"
-              >
-                Политикой конфиденциальности
-              </Link>{" "}
-              и{" "}
-              <Link
-                href="/consent"
-                className="underline hover:text-white cursor-pointer"
-              >
-                Согласием на обработку персональных данных
-              </Link>
-            </label>
-          </div>
-
+        />
+        <div className="relative w-full max-w-[538px] bg-[#0D0E13] rounded-2xl border border-white/10 px-5 pb-6 pt-7 md:p-10 md:pb-9 shadow-2xl my-auto">
           <button
-            type="submit"
-            className="w-full bg-white text-black text-[15px] py-4 rounded-[7px] hover:bg-white/90 transition-all active:scale-[0.98] mt-1 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-medium"
-            disabled={!isPolicyChecked}
+            onClick={closeModal}
+            className="absolute top-6 right-6 text-[#ffffffa6] hover:text-white cursor-pointer transition-colors p-1"
           >
-            Отправить заявку
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M18 6L6 18M6 6L18 18"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
-        </form>
+
+          <div className="mb-7">
+            {tariffName && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-orange/30 mb-4">
+                <div className="w-4 h-4 flex items-center justify-center">
+                  <svg width="10" height="8" viewBox="0 0 12 9" fill="none">
+                    <path
+                      d="M1 4L4.5 7.5L11 1"
+                      stroke="#FB4114"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <span className="text-[10px] my-auto md:text-[11px] text-white uppercase tracking-wider">
+                  {data?.tariffPrefix || "Тариф: "}{" "}
+                  <span className="text-orange font-medium">{tariffName}</span>
+                </span>
+              </div>
+            )}
+
+            <h2 className="text-[20px] md:text-[24px] text-white mb-2 tracking-tight">
+              {data?.title || "Обсудить проект"}
+            </h2>
+            <p className="text-white/50 text-[14px] leading-relaxed">
+              {data?.subtitle ||
+                "Расскажите о вашем мероприятии — мы предложим оптимальное решение"}
+            </p>
+          </div>
+
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            <div className="space-y-[6px]">
+              <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
+                {data?.fioLabel || "ФИО"}
+              </label>
+              <input
+                type="text"
+                name="fio"
+                placeholder={data?.fioPlaceholder || "Иванов Иван Иванович"}
+                value={formData.fio}
+                onChange={(e) =>
+                  setFormData({ ...formData, fio: e.target.value })
+                }
+                className={`w-full bg-[#1c1c1f] border rounded-[8px] px-4 py-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors ${errors.fio ? "border-orange" : "border-white/5 focus:border-white"}`}
+              />
+            </div>
+
+            <div className="space-y-[6px]">
+              <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
+                {data?.emailLabel || "Email"}
+              </label>
+              <input
+                type="email"
+                name="email"
+                placeholder={data?.emailPlaceholder || "example@mail.ru"}
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                className={`w-full bg-[#1c1c1f] border rounded-[8px] px-4 py-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors ${errors.email ? "border-orange" : "border-white/5 focus:border-white"}`}
+              />
+            </div>
+
+            <div className="space-y-[6px]">
+              <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
+                {data?.phoneLabel || "Телефон"}
+              </label>
+              <div
+                className={`relative w-full border rounded-[8px] transition-colors ${errors.phone ? "border-orange" : "border-white/5 focus-within:border-white"}`}
+              >
+                <PhoneInput
+                  country={"ru"}
+                  value={formData.phone}
+                  onChange={(phone) => setFormData({ ...formData, phone })}
+                  containerClass="w-full"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-[6px]">
+              <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
+                {data?.descriptionLabel || "Описание проекта"}
+              </label>
+              <textarea
+                name="description"
+                placeholder={
+                  data?.descriptionPlaceholder ||
+                  "Расскажите о вашем мероприятии: формат, место, дата, задачи..."
+                }
+                rows={3}
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                className="w-full bg-[#1c1c1f] border border-white/5 rounded-[8px] px-4 py-[13px] text-white placeholder:text-white/20 focus:outline-none focus:border-white transition-colors resize-none"
+              />
+            </div>
+
+            <div className="space-y-[6px]">
+              <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
+                {data?.fileLabel || "Техническое задание"}{" "}
+                <span className="opacity-40">
+                  {data?.fileOptionalText || "(необязательно)"}
+                </span>
+              </label>
+
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="hidden"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,image/*"
+              />
+
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`w-full border-2 border-dashed rounded-[8px] p-6 flex flex-col items-center justify-center bg-[#1c1c1f]/30 cursor-pointer transition-all ${isDragging ? "border-orange bg-orange/5" : "border-white/10 hover:border-white/20"}`}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  className={`mb-2 transition-colors ${file || isDragging ? "text-orange" : "text-white/40"}`}
+                >
+                  <path
+                    d="M10 4V16M4 10H16"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <p className="text-[12px] text-white/40 text-center pointer-events-none">
+                  {file ? (
+                    <span className="text-white font-medium italic">
+                      {file.name}
+                    </span>
+                  ) : (
+                    <>
+                      {data?.fileUploadText1 || "Перетащите файлы или "}
+                      <span className="text-orange underline">
+                        {data?.fileUploadText2 || "выберите"}
+                      </span>
+                    </>
+                  )}
+                </p>
+                {!file && (
+                  <p className="text-[10px] text-white/20 mt-1 pointer-events-none">
+                    {data?.fileSubtext ||
+                      "PDF, Word, Excel, изображения — до 20 МБ"}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2 items-start">
+              <div className="relative flex items-center justify-center mt-[2px]">
+                <input
+                  type="checkbox"
+                  id="policy-discuss"
+                  checked={isPolicyChecked}
+                  onChange={() => setIsPolicyChecked(!isPolicyChecked)}
+                  className="peer h-5 w-5 shrink-0 appearance-none rounded border border-white/10 bg-[#1c1c1f] checked:border-orange transition-all cursor-pointer"
+                />
+                <div className="absolute pointer-events-none text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                  <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+                    <path
+                      d="M1 4L4.5 7.5L11 1"
+                      stroke="#FB4114"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <label
+                htmlFor="policy-discuss"
+                className="text-[11px] leading-[1.4] text-[#ffffff73] cursor-pointer select-none"
+              >
+                {data?.policyText1 || "Отправляя заявку, вы соглашаетесь с "}
+                <Link
+                  href="/privacy"
+                  className="underline hover:text-white transition-colors cursor-pointer"
+                >
+                  {data?.policyLink1 || "Политикой конфиденциальности"}
+                </Link>{" "}
+                {data?.policyText2 || " и "}
+                <Link
+                  href="/consent"
+                  className="underline hover:text-white transition-colors cursor-pointer"
+                >
+                  {data?.policyLink2 ||
+                    "Согласием на обработку персональных данных"}
+                </Link>
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-white text-black text-[15px] py-4 rounded-[7px] hover:bg-white/90 transition-all active:scale-[0.98] mt-1 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-medium"
+              disabled={!isPolicyChecked || isSending}
+            >
+              {isSending
+                ? "Отправка..."
+                : data?.submitButtonText || "Отправить заявку"}
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

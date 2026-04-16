@@ -3,7 +3,7 @@ import { defineField, defineType } from "sanity";
 export const casesSection = defineType({
   name: "casesSection",
   title: "Настройки секции Кейсы",
-  type: "document",
+  type: "object", // Теперь это объект для вставки в страницу
   fields: [
     defineField({
       name: "sectionIndex",
@@ -29,13 +29,26 @@ export const casesSection = defineType({
       type: "text",
       rows: 3,
     }),
+    // Поле для выбора кейсов по ссылке
+    defineField({
+      name: "casesList",
+      title: "Список выбранных кейсов",
+      type: "array",
+      of: [
+        {
+          type: "reference",
+          to: [{ type: "case" }],
+        },
+      ],
+      description: "Выберите готовые кейсы из списка или создайте новые",
+    }),
   ],
 });
 
 export const caseItem = defineType({
   name: "case",
   title: "Кейсы (контент)",
-  type: "document",
+  type: "document", // Оставляем документом, чтобы данные сохранились в базе
   fields: [
     defineField({
       name: "customer",
@@ -56,6 +69,16 @@ export const caseItem = defineType({
       type: "file",
       options: { accept: "video/*" },
       validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: "previewImage",
+      title: "Превью видео (Poster)",
+      type: "image",
+      options: {
+        hotspot: true,
+      },
+      description:
+        "Отображается до начала воспроизведения видео. Если не заполнено, будет показан первый кадр видео.",
     }),
     defineField({
       name: "order",

@@ -3,8 +3,6 @@ import Components from "@/components";
 import { getSiteSettings } from "@/store/getSiteSettings";
 import { Metadata } from "next";
 
-import Script from "next/script";
-
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
 
@@ -35,9 +33,9 @@ export default async function RootLayout({
     >
       <head>
         {settings?.headScripts && (
-          <Script
+          <script
             id="head-scripts"
-            strategy="afterInteractive"
+            suppressHydrationWarning
             dangerouslySetInnerHTML={{ __html: settings.headScripts }}
           />
         )}
@@ -45,7 +43,7 @@ export default async function RootLayout({
       <body className="bg-black font-sans min-h-full text-white ">
         {settings?.bodyScripts && (
           <div
-            id="body-scripts"
+            id="body-scripts-container"
             style={{ display: "none" }}
             dangerouslySetInnerHTML={{ __html: settings.bodyScripts }}
           />

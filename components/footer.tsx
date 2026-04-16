@@ -3,14 +3,12 @@ import React, { useEffect, useState } from "react";
 import { useLenis } from "lenis/react";
 import Button from "./ui/button";
 import { usePathname } from "next/navigation";
-import { createClient } from "next-sanity";
+import Link from "next/link";
 
-const client = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: "production",
-  apiVersion: "2026-01-01",
-  useCdn: false,
-});
+interface ContactItem {
+  label: string;
+  link: string;
+}
 
 interface FooterData {
   title?: string;
@@ -22,25 +20,21 @@ interface FooterData {
   telegram?: string;
   email?: string;
   address?: string;
+  addressurl?: string;
   copyright?: string;
   policy?: string;
+  consent?: string;
+  customContacts?: ContactItem[];
   menu?: { label: string; target: string }[];
 }
 
-export default function Footer() {
-  const [data, setData] = useState<FooterData | null>(null);
+interface FooterProps {
+  data: FooterData | null;
+}
 
-  useEffect(() => {
-    const fetchFooter = async () => {
-      try {
-        const res = await client.fetch(`*[_type == "footer"][0]`);
-        setData(res);
-      } catch (error) {
-        console.error("Sanity fetch error:", error);
-      }
-    };
-    fetchFooter();
-  }, []);
+export default function Footer({ data }: FooterProps) {
+  const path = usePathname();
+  const lenis = useLenis();
 
   const menu = data?.menu?.length
     ? data.menu
@@ -54,9 +48,6 @@ export default function Footer() {
         { label: "FAQ", target: "#faq" },
         { label: "Контакты", target: "#contacts" },
       ];
-
-  const path = usePathname();
-  const lenis = useLenis();
 
   const handleScroll = (target: string) => {
     lenis?.scrollTo(target, {
@@ -110,27 +101,80 @@ export default function Footer() {
               {data?.contactsTitle || "контакты"}
             </li>
             <li className="text-[17px] max-md:opacity-62 max-sm:text-[14px] tracking-[-3%] leading-[137%] uppercase">
-              {data?.phone || "7 (911) 000-00-00"}
+              <h2>
+                <a
+                  href={
+                    data?.phone
+                      ? `tel:${data.phone.replace(/[^0-9+]/g, "")}`
+                      : "tel:+79110000000"
+                  }
+                >
+                  {data?.phone || "7 (911) 000-00-00"}
+                </a>
+              </h2>
             </li>
             <li className="text-[17px] max-md:opacity-62 max-sm:text-[14px] tracking-[-3%] leading-[137%] uppercase">
-              <a href={data?.telegram || "#"}> telegram</a>
+              <h2>
+                <a href={data?.telegram ? data?.telegram : "#"}>
+                  {data?.telegram
+                    ? data.telegram.replace(/^https?:\/\/t\.me\//, "")
+                    : "telegram"}
+                </a>
+              </h2>
             </li>
             <li className="text-[17px] max-md:opacity-62 max-sm:text-[14px] tracking-[-3%] leading-[137%] uppercase">
-              <a href={data?.email ? `mailto:${data.email}` : "#"}> email</a>
+              <h2>
+                <a href={data?.email ? `mailto:${data.email}` : "#"}>
+                  {" "}
+                  {data?.email || "mail"}
+                </a>
+              </h2>
             </li>
             <li className="text-[17px] max-md:opacity-62 max-sm:text-[14px] tracking-[-3%] leading-[137%] uppercase">
-              {data?.address || "Санкт-Петербург, ул. Можайская 17"}
+              <h2>
+                <a href={data?.addressurl ? data.addressurl : "#"}>
+                  {data?.address || "Санкт-Петербург, ул. Можайская 17"}
+                </a>
+              </h2>
             </li>
+            {data?.customContacts?.map((contact: ContactItem, idx: number) => (
+              <li
+                key={idx}
+                className="text-[17px] max-md:opacity-62 max-sm:text-[14px] tracking-[-3%] leading-[137%] uppercase"
+              >
+                <h2>
+                  <a
+                    href={contact.link || "#"}
+                    target={
+                      contact.link?.startsWith("http") ? "_blank" : undefined
+                    }
+                  >
+                    {contact.label}
+                  </a>
+                </h2>
+              </li>
+            ))}
           </ul>
         </div>
       </div>
-      <div className="grid gap-[20px] max-sm:gap-2 grid-cols-2 max-md:flex flex-col items-center">
+      <div className="grid gap-[20px] max-sm:gap-2 grid-cols-2 max-md:flex flex-col">
         <p className="text-white/49 max-md:text-white/19 max-sm:text-[13px] leading-[137%] tracking-[-3%] uppercase text-[15px]">
           {data?.copyright || "© 2026 bussines stream. Все права защищены"}
         </p>
-        <a className="text-white/49 max-md:text-white/19 max-sm:text-[13px] leading-[137%] underline tracking-[-3%] uppercase text-[15px]">
-          {data?.policy || "политика конфиденциальности"}
-        </a>
+        <div className="flex flex-col gap-3">
+          <Link
+            href="/privacy"
+            className="text-white/49 max-md:text-white/19 max-sm:text-[13px] leading-[137%] underline tracking-[-3%] uppercase text-[15px]"
+          >
+            {data?.policy || "политика конфиденциальности"}
+          </Link>
+          <Link
+            href="/consent"
+            className="text-white/49 max-md:text-white/19 max-sm:text-[13px] leading-[137%] underline tracking-[-3%] uppercase text-[15px]"
+          >
+            {data?.consent || "редактируйте пожалуйста через админку"}
+          </Link>
+        </div>
       </div>
     </footer>
   );

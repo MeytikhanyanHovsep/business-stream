@@ -44,5 +44,12 @@ export default defineType({
       type: "text",
       rows: 5,
     }),
+    defineField({
+      name: "robotsText",
+      title: "Robots.txt",
+      type: "text",
+      description:
+        "Напишите правила для поисковых роботов (например, User-agent: * Disallow: /admin)",
+    }),
   ],
 });

@@ -55,6 +55,42 @@ export default defineType({
       type: "string",
     }),
     defineField({
+      name: "addressurl",
+      title: "Ссылка Адреса",
+      type: "url",
+    }),
+    defineField({
+      name: "customContacts",
+      title: "Дополнительные контакты",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          name: "contactItem",
+          fields: [
+            {
+              name: "label",
+              type: "string",
+              title: "Текст ссылки (например: WhatsApp)",
+            },
+            {
+              name: "link",
+              type: "string",
+              title: "Ссылка или значение",
+              description:
+                "Для телефона: tel:+7..., для почты: mailto:..., для ссылок: https://...",
+            },
+          ],
+          preview: {
+            select: {
+              title: "label",
+              subtitle: "link",
+            },
+          },
+        },
+      ],
+    }),
+    defineField({
       name: "copyright",
       title: "Текст копирайта",
       type: "string",
@@ -65,6 +101,12 @@ export default defineType({
       title: "Текст политики конфиденциальности",
       type: "string",
       initialValue: "политика конфиденциальности",
+    }),
+    defineField({
+      name: "consent",
+      title: "Текст соглашение",
+      type: "string",
+      initialValue: "соглашение ",
     }),
     defineField({
       name: "menu",

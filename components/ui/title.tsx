@@ -25,9 +25,9 @@ export default function Title({
         <span className="text-orange pl-0.5 "> {title}</span>
       </h5>
       <div className={`flex flex-col max-md:gap-[18px]  gap-[35px] col-span-2`}>
-        <h3 className="text-[53px] max-md:text-[32px] leading-[106%] tracking-[-4%] text-balance">
+        <h2 className="text-[53px] max-[1450px]:text-[40px] max-md:text-[32px] leading-[106%] tracking-[-4%] text-balance">
           {children}
-        </h3>
+        </h2>
         {description && (
           <p className="text-[17px] max-md:text-[15px] leading-[131%] tracking-[-3%] text-white/79  text-balance">
             {description}

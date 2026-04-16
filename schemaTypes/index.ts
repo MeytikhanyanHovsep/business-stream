@@ -1,3 +1,4 @@
+import { page } from "./page";
 import about from "./about";
 import advantages from "./advantages";
 import { caseItem, casesSection } from "./cases";
@@ -10,8 +11,13 @@ import { pricing, pricingSection } from "./pricing";
 import { reviewItem, reviewsSection } from "./reviews";
 import { service, servicesSection } from "./service";
 import { step, processSection } from "./step";
+import quizSection from "./quiz";
+import { modalContact, modalDiscuss, modalReels, modalAudit } from "./modals";
+import { privacyPage } from "./privacyPage";
+import { consentPage } from "./consentPage";
 
 export const schemaTypes = [
+  page,
   header,
   hero,
   advantages,
@@ -24,10 +30,17 @@ export const schemaTypes = [
   caseItem,
   processSection,
   step,
+  quizSection,
   reviewsSection,
   reviewItem,
   faqSection,
   faqItem,
   footer,
   settings,
+  modalContact,
+  modalDiscuss,
+  modalReels,
+  modalAudit,
+  privacyPage,
+  consentPage,
 ];

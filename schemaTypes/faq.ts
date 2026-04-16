@@ -3,7 +3,7 @@ import { defineField, defineType } from "sanity";
 export const faqSection = defineType({
   name: "faqSection",
   title: "Настройки секции FAQ",
-  type: "document",
+  type: "object",
   fields: [
     defineField({
       name: "sectionIndex",
@@ -23,13 +23,25 @@ export const faqSection = defineType({
       type: "text",
       rows: 2,
     }),
+    defineField({
+      name: "faqList",
+      title: "Список вопросов",
+      type: "array",
+      of: [
+        {
+          type: "reference",
+          to: [{ type: "faq" }],
+        },
+      ],
+      description: "Выберите существующие вопросы из списка",
+    }),
   ],
 });
 
 export const faqItem = defineType({
   name: "faq",
-  title: "FAQ",
-  type: "document",
+  title: "FAQ (Вопрос-ответ)",
+  type: "document", // Оставляем документом, чтобы данные сохранились
   fields: [
     defineField({
       name: "question",

@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { PortableText } from "@portabletext/react";
+import { PortableText, PortableTextComponents } from "@portabletext/react";
 import { createClient } from "next-sanity";
+import Privacy from "@/components/privacy";
 import Header from "@/components/header";
-import Consent from "@/components/consent";
 
 const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
@@ -12,12 +12,10 @@ const client = createClient({
 });
 
 async function getData(): Promise<any> {
-  const query = `*[_type == "consentPage"][0]{
+  const query = `*[_type == "privacyPage"][0]{
   label,
   title,
-  websiteUrl,
-  operatorName,
-  revocationEmail,
+  lastUpdated,
   headerConfig,
   sections[]{
     heading,
@@ -32,14 +30,13 @@ async function getData(): Promise<any> {
   }
 }
 
-export default async function ConsentPage() {
+export default async function PrivacyPage() {
   const data: any = await getData();
 
   return (
     <>
       <Header data={data.headerConfig} />
-
-      <Consent data={data} />
+      <Privacy data={data} />
     </>
   );
 }

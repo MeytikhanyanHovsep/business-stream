@@ -3,7 +3,7 @@ import { defineField, defineType } from "sanity";
 export const pricingSection = defineType({
   name: "pricingSection",
   title: "Настройки секции Тарифы",
-  type: "document",
+  type: "object",
   fields: [
     defineField({
       name: "sectionIndex",
@@ -28,6 +28,19 @@ export const pricingSection = defineType({
       title: "Описание",
       type: "text",
       rows: 3,
+    }),
+    defineField({
+      name: "pricingList",
+      title: "Выбранные тарифы",
+      type: "array",
+      of: [
+        {
+          type: "reference",
+          to: [{ type: "pricing" }],
+        },
+      ],
+      description:
+        "Выберите существующие тарифы, которые будут отображаться в этой секции",
     }),
   ],
 });

@@ -6,6 +6,24 @@ export default defineType({
   type: "document",
   fields: [
     defineField({
+      name: "internalName",
+      title: "Внутреннее название",
+      description: "Например: 'Главная страница' или 'Лендинг без меню'",
+      type: "string",
+    }),
+    defineField({
+      name: "headerType",
+      title: "Тип хедера",
+      type: "string",
+      options: {
+        list: [
+          { title: "С навигацией", value: "withNavigation" },
+          { title: "Без навигации (только логотип)", value: "simple" },
+        ],
+      },
+      initialValue: "withNavigation",
+    }),
+    defineField({
       name: "logo",
       title: "Логотип",
       type: "image",
@@ -14,31 +32,16 @@ export default defineType({
       name: "menu",
       title: "Меню навигации",
       type: "array",
+      hidden: ({ document }) => document?.headerType === "simple",
       of: [
         {
           type: "object",
           fields: [
-            {
-              name: "label",
-              type: "string",
-              title: "Название (например: О нас)",
-            },
+            { name: "label", type: "string", title: "Название" },
             {
               name: "target",
               type: "string",
-              title: "ID секции",
-              options: {
-                list: [
-                  { title: "Главная", value: "home" },
-                  { title: "Преимущества", value: "advantages" },
-                  { title: "О нас", value: "about" },
-                  { title: "Тарифы", value: "pricing" },
-                  { title: "Кейсы", value: "cases" },
-                  { title: "Отзывы", value: "reviews" },
-                  { title: "FAQ", value: "faq" },
-                  { title: "Контакты", value: "contacts" },
-                ],
-              },
+              title: "ID секции (для скролла)",
             },
           ],
         },
@@ -46,27 +49,8 @@ export default defineType({
     }),
     defineField({
       name: "btnContact",
-      title: "Кнопка 'Связаться с нами'",
+      title: "Текст кнопки",
       type: "string",
-      initialValue: "Связаться с нами",
-    }),
-    defineField({
-      name: "btnDiscuss",
-      title: "Кнопка мобильная 'Обсудить проект'",
-      type: "string",
-      initialValue: "Обсудить проект",
-    }),
-    defineField({
-      name: "btnAudit",
-      title: "Кнопка мобильная 'Live-аудит'",
-      type: "string",
-      initialValue: "Live-аудит",
-    }),
-    defineField({
-      name: "backToMain",
-      title: "Текст 'Вернуться на главную'",
-      type: "string",
-      initialValue: "Вернуться на главную",
     }),
   ],
 });

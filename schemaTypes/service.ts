@@ -1,9 +1,8 @@
 import { defineField, defineType } from "sanity";
 
-// Схема отдельной услуги (чтобы старые данные вернулись)
 export const service = defineType({
   name: "service",
-  title: "Услуги (контент)",
+  title: "Услуга (карточка)",
   type: "document",
   fields: [
     defineField({ name: "title", title: "Название услуги", type: "string" }),
@@ -43,11 +42,10 @@ export const service = defineType({
   ],
 });
 
-// Схема настроек секции (заголовки)
 export const servicesSection = defineType({
   name: "servicesSection",
-  title: "Настройки секции Услуги",
-  type: "document",
+  title: "Секция Услуги",
+  type: "object",
   fields: [
     defineField({
       name: "sectionIndex",
@@ -72,6 +70,18 @@ export const servicesSection = defineType({
       title: "Подзаголовок",
       type: "text",
       rows: 2,
+    }),
+    defineField({
+      name: "servicesList",
+      title: "Список выбранных услуг",
+      type: "array",
+      of: [
+        {
+          type: "reference",
+          to: [{ type: "service" }],
+        },
+      ],
+      description: "Выберите существующие услуги из списка или создайте новые",
     }),
   ],
 });

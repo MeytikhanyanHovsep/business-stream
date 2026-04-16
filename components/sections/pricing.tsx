@@ -37,54 +37,16 @@ export type PricingItem = {
   button: string;
 };
 
-interface PricingPageData {
-  settings: {
-    sectionIndex?: string;
-    sectionTitle?: string;
-    mainTitle?: string;
-    description?: string;
-  };
-  tariffs: PricingItem[];
-}
+type Props = {
+  data: any;
+};
 
-export default function Pricing() {
-  const [pageData, setPageData] = useState<PricingPageData | null>(null);
+export default function Pricing({ data }: Props) {
   const [openService, setOpenService] = useState<null | number>(null);
 
-  useEffect(() => {
-    const fetchPricing = async () => {
-      try {
-        const result = await client.fetch(
-          `{
-            "settings": *[_type == "pricingSection"][0],
-            "tariffs": *[_type == "pricing"] | order(order asc) {
-              _id,
-              title,
-              price,
-              term,
-              description,
-              isPopular,
-              mainServices,
-              serviceSections,
-              bonus,
-              footerNote,
-              theme,
-              "image": image.asset->url,
-              button
-            }
-          }`,
-        );
-        setPageData(result);
-      } catch (error) {
-        console.error("Sanity error:", error);
-      }
-    };
-    fetchPricing();
-  }, []);
+  if (!data || data.pricingList.length == 0) return null;
 
-  if (!pageData || pageData.tariffs.length === 0) return null;
-
-  const { settings, tariffs } = pageData;
+  const { pricingList } = data;
 
   return (
     <section
@@ -94,18 +56,18 @@ export default function Pricing() {
       <Title
         description={
           <span style={{ whiteSpace: "pre-line" }}>
-            {settings?.description ||
+            {data?.description ||
               `Стоимость зависит от длительности съемки, количества \n камер, типа мероприятия и состава съемочной группы.`}
           </span>
         }
-        title={settings?.sectionTitle || "Тарифы"}
-        index={settings?.sectionIndex || "[05] "}
+        title={data?.sectionTitle || "Тарифы"}
+        index={data?.sectionIndex || "[05] "}
       >
-        {settings?.mainTitle || "Выбирайте формат под задачу"}
+        {data?.mainTitle || "Выбирайте формат под задачу"}
       </Title>
 
       <div className="grid md:mt-[-54px] max-md:grid-cols-1 max-md:gap-[20px] grid-cols-2 gap-[25px]">
-        {tariffs.map((tariff, id) => (
+        {pricingList.map((tariff, id) => (
           <div
             key={tariff._id}
             className={`pl-[58px] max-md:p-0! max-xl:px-4 max-xl:pt-[44px] max-xl:pb-[37px] pb-[51px] relative pr-[97px] pt-[73px] border border-[#3D3D3D] overflow-hidden rounded-[9px] ${tariff.theme ? "bg-[url('/images/noise-bg.jpg')]" : "bg-[#151515]"}`}
@@ -160,14 +122,13 @@ export default function Pricing() {
               <Button
                 modal="discuss"
                 tariffName={tariff.title}
-                type="orange"
+                type={tariff.theme ? "black" : "orange"}
                 style="w-full mb-[30px] max-lg:mb-[23px] mt-[21px]"
                 isSmall={true}
               >
                 {tariff.button || "Обсудить проект"}
               </Button>
 
-              {/* Услуги */}
               {tariff.mainServices && (
                 <ul className="grid grid-cols-2 max-lg:grid-cols-1 gap-x-6 gap-y-[15px]">
                   {tariff.mainServices.map((service, index) => (

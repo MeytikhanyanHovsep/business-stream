@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { useLenis } from "lenis/react";
 import Button from "./ui/button";
@@ -6,18 +7,6 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { createClient } from "next-sanity";
-import imageUrlBuilder, { SanityImageSource } from "@sanity/image-url";
-
-const client = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: "production",
-  apiVersion: "2026-01-01",
-  useCdn: false,
-});
-
-const builder = imageUrlBuilder(client);
-const urlFor = (source: SanityImageSource) => builder.image(source);
 
 interface MenuItem {
   label: string;
@@ -25,32 +14,27 @@ interface MenuItem {
 }
 
 interface HeaderData {
-  logo?: SanityImageSource;
+  logoUrl?: string; // Передаем уже готовую строку URL
   menu?: MenuItem[];
   btnContact?: string;
-  btnDiscuss?: string;
-  btnAudit?: string;
   backToMain?: string;
 }
 
-export default function Header() {
-  const [data, setData] = useState<HeaderData | null>(null);
+interface HeroData {
+  heroButton: string;
+  heroButton2: string;
+}
+
+interface HeaderProps {
+  data: HeaderData | null;
+  dataButtons?: HeroData | null;
+}
+
+export default function Header({ data, dataButtons }: HeaderProps) {
   const [menuToggle, setMenuToggle] = useState<boolean>(false);
   const path = usePathname();
   const lenis = useLenis();
   const [activeSection, setActiveSection] = useState<string>("home");
-
-  useEffect(() => {
-    const fetchHeader = async () => {
-      try {
-        const res = await client.fetch<HeaderData>(`*[_type == "header"][0]`);
-        setData(res);
-      } catch (error) {
-        console.error("Sanity fetch error:", error);
-      }
-    };
-    fetchHeader();
-  }, []);
 
   const currentMenu: MenuItem[] = data?.menu?.length
     ? data.menu
@@ -101,14 +85,12 @@ export default function Header() {
     });
   };
 
-  const logoSrc: string = data?.logo
-    ? urlFor(data.logo).url()
-    : "/images/logo.png";
+  const logoSrc: string = data?.logoUrl || "/images/logo.png";
 
   return path === "/" ? (
     <>
-      <header className="fixed z-200 container top-[23px] left-1/2  -translate-x-1/2">
-        <div className="flex rounded-[12px] relative items-center bg-white/5 backdrop-blur-[48.8px] p-[7px] pl-4 max-sm:p-0 max-sm:pr-[3px] max-sm:bg-transparent max-sm:backdrop-blur-[0]  justify-between">
+      <header className="fixed z-200 container top-[23px] left-1/2 -translate-x-1/2">
+        <div className="flex rounded-[12px] relative items-center bg-white/5 backdrop-blur-[48.8px] p-[7px] pl-4 max-sm:p-0 max-sm:pr-[3px] max-sm:bg-transparent max-sm:backdrop-blur-[0] justify-between">
           <Link href="/" className="isolate">
             <Image
               src={logoSrc}
@@ -118,7 +100,7 @@ export default function Header() {
               alt="Business Stream"
             />
           </Link>
-          <nav className="min-[1150px]:absolute max-lg:hidden h-full  min-[1150px]:top-1/2 min-[1150px]:left-1/2 min-[1150px]:-translate-1/2">
+          <nav className="min-[1150px]:absolute max-lg:hidden h-full min-[1150px]:top-1/2 min-[1150px]:left-1/2 min-[1150px]:-translate-1/2">
             <ul className="flex gap-[50px] max-[1400px]:gap-10 max-[1110px]:gap-[20px] h-full max-xl:gap-[30px] items-center w-full">
               {currentMenu.map((e, i) => (
                 <li key={i}>
@@ -192,7 +174,7 @@ export default function Header() {
                   isSmall={true}
                   style="min-w-full"
                 >
-                  {data?.btnDiscuss || "Обсудить проект"}
+                  {dataButtons?.heroButton || "Обсудить проект"}
                 </Button>
                 <Button
                   modal="reels"
@@ -200,7 +182,7 @@ export default function Header() {
                   isSmall={true}
                   style="min-w-full"
                 >
-                  {data?.btnAudit || "Live-аудит"}
+                  {dataButtons?.heroButton2 || "Live-аудит"}
                 </Button>
               </div>
             </nav>
@@ -209,7 +191,7 @@ export default function Header() {
       </AnimatePresence>
     </>
   ) : (
-    <header className="sticky top-0 z-10 bg-[rgba(10,10,10,0.92)] backdrop-blur-[16px] border-b border-[rgba(255,255,255,0.07)] py-[18px]">
+    <header className="fixed w-full top-0 z-10 bg-[rgba(10,10,10,0.92)] backdrop-blur-[16px] border-b border-[rgba(255,255,255,0.07)] py-[18px]">
       <div
         className="max-width-[800px] mx-auto px-6 flex items-center justify-between gap-4"
         style={{ maxWidth: "800px" }}

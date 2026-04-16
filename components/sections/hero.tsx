@@ -4,53 +4,27 @@ import Button from "../ui/button";
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Advantages from "./advantages";
-import { createClient } from "next-sanity";
 
-const client = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: "production",
-  apiVersion: "2026-01-01",
-  useCdn: true,
-});
+type Props = {
+  data: any;
+  advantagesData: any;
+};
 
-interface HeroData {
-  titleLine1: string;
-  titleLine2: string;
-  subtitle: string;
-  videoUrl?: string;
-  heroButton: string;
-  heroButton2: string;
-}
-
-export default function Hero() {
+export default function Hero({ data, advantagesData }: Props) {
   const [width, setWidth] = useState<number | null>(null);
-  const [data, setData] = useState<HeroData | null>(null);
 
   const { scrollY } = useScroll();
   const videoY = useTransform(scrollY, [0, 1000], [-202, 1520]);
-  const videoWidth = useTransform(scrollY, [0, 1100], [width + "px", "603px"]);
+  const videoWidth = useTransform(
+    scrollY,
+    [0, 1100],
+    [width ? width + "px" : "100%", "603px"],
+  );
   const videoHeight = useTransform(scrollY, [0, 1000], ["1019px", "455px"]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await client.fetch(`*[_type == "hero"][0]{
-          titleLine1,
-          titleLine2,
-          subtitle,
-          "videoUrl": video.asset->url,
-          heroButton,
-          heroButton2,
-        }`);
-        setData(res);
-      } catch (error) {
-        console.error("Sanity fetch error:", error);
-      }
-    };
-    fetchData();
-
     if (typeof window !== "undefined") {
-      const handleResize = () => setWidth(window?.innerWidth);
+      const handleResize = () => setWidth(window.innerWidth);
       handleResize();
       window.addEventListener("resize", handleResize);
       return () => window.removeEventListener("resize", handleResize);
@@ -71,7 +45,7 @@ export default function Hero() {
           left: "50%",
           x: "-50%",
         }}
-        className="absolute max-[1200px]:hidden! will-change-transform top-0 z-0 object-cover pointer-events-auto "
+        className="absolute max-[1200px]:hidden! w-full will-change-transform top-0 z-0 object-cover pointer-events-auto "
       >
         <source
           className="w-full"
@@ -112,9 +86,9 @@ export default function Hero() {
               )}
             </span>
           </h1>
-          <p className="tracking-[-4%] max-md:max-w-[270px] text-center text-white text-[21px] leading-[133%] mt-[50px]">
+          <h2 className="tracking-[-4%] max-md:max-w-[270px] text-center text-white text-[21px] leading-[133%] mt-[50px]">
             {data?.subtitle || "Reels-ролик с вашего события через 48 часов!"}
-          </p>
+          </h2>
           <div className="flex max-sm:w-full max-sm:flex-col gap-[10px] mt-[34px]">
             <Button modal="discuss" hasDetails={true} style="max-sm:min-w-full">
               {data?.heroButton || "Обсудить проект"}
@@ -143,7 +117,7 @@ export default function Hero() {
           </div>
         </div>
       </main>
-      <Advantages />
+      <Advantages data={advantagesData} />
     </div>
   );
 }

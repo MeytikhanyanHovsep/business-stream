@@ -1,9 +1,7 @@
 "use client";
 import React from "react";
-import Header from "./header";
 import { ReactLenis } from "lenis/react";
 import Footer from "./footer";
-import Modals from "./modals";
 type Props = {
   children: React.ReactNode;
 };
@@ -18,11 +16,8 @@ export default function Components({ children }: Props) {
           smoothWheel: true,
         }}
       >
-        <Header />
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {children as any}
-        <Modals />
-        <Footer />
       </ReactLenis>
     </>
   );

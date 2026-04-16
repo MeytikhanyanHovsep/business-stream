@@ -3,7 +3,7 @@ import { defineField, defineType } from "sanity";
 export const reviewsSection = defineType({
   name: "reviewsSection",
   title: "Настройки секции Отзывы",
-  type: "document",
+  type: "object", // Теперь это объект, который можно добавить на страницу
   fields: [
     defineField({
       name: "sectionIndex",
@@ -23,13 +23,32 @@ export const reviewsSection = defineType({
       type: "text",
       rows: 2,
     }),
+    defineField({
+      name: "description",
+      title: "Описание",
+      type: "text",
+      rows: 3,
+    }),
+    // Добавляем массив ссылок на отзывы
+    defineField({
+      name: "reviewsList",
+      title: "Список выбранных отзывов",
+      type: "array",
+      of: [
+        {
+          type: "reference",
+          to: [{ type: "review" }],
+        },
+      ],
+      description: "Выберите отзывы, которые должны отображаться в этой секции",
+    }),
   ],
 });
 
 export const reviewItem = defineType({
   name: "review",
-  title: "Отзывы (контент)",
-  type: "document",
+  title: "Отзыв (карточка)",
+  type: "document", // Оставляем документом, чтобы данные не пропали и их можно было выбирать ссылкой
   fields: [
     defineField({
       name: "companyImg",

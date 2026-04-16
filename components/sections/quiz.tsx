@@ -6,13 +6,6 @@ import Image from "next/image";
 import Button from "@/components/ui/button";
 import { createClient } from "next-sanity";
 
-const client = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: "production",
-  apiVersion: "2026-01-01",
-  useCdn: true,
-});
-
 interface MediaItem {
   id: number;
   src: string;
@@ -26,32 +19,15 @@ interface MediaItem {
   zIndex: number;
 }
 
-export default function Quiz() {
+type Props = {
+  data: any;
+};
+
+export default function Quiz({ data }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [data, setData] = useState<{
-    title: string;
-    subtitle: string;
-    buttonText: string;
-    imageUrls: string[];
-  } | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await client.fetch(`*[_type == "quiz"][0]{
-          title,
-          subtitle,
-          buttonText,
-          "imageUrls": images[].asset->url
-        }`);
-        setData(res);
-      } catch (error) {
-        console.error("Sanity fetch error:", error);
-      }
-    };
-    fetchData();
-
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
@@ -182,7 +158,7 @@ export default function Quiz() {
 
   return (
     <section ref={containerRef} className="relative max-md:h-screen h-[200vh]">
-      <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center justify-center">
+      <div className="sticky top-0 h-screen w-full  flex items-center justify-center">
         <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
           {mediaItems.map((item) => (
             <FloatingImage
@@ -200,9 +176,9 @@ export default function Quiz() {
           style={{ scale: textScale }}
           className="relative z-20 flex flex-col items-center text-center px-10"
         >
-          <h2 className="text-[53px] max-lg:text-[30px] font-medium text-white tracking-[-4%] leading-[106%] mb-5 whitespace-pre-wrap">
+          <h2 className="text-[53px] max-[1450px]:text-[40px] max-lg:text-[30px] font-medium text-white tracking-[-4%] text-balance  leading-[106%] mb-5 whitespace-pre-wrap">
             {data?.title ||
-              "Не уверены, какой формат подойдёт?\nПройдите короткий квиз и получите расчёт стоимости"}
+              "Не уверены, какой формат подойдёт?\nПройдите короткий квиз и получите расчёт стоимост"}
           </h2>
 
           <p className="text-white/78 text-[22px] leading-[106%] tracking-[-3%] mb-[34px]">
@@ -256,8 +232,8 @@ function FloatingImage({
 
   const blur = useTransform(
     delayedProgress,
-    [0, 0.2, 0.8, 1],
-    isMobile ? ["0px", "0px", "0px", "0px"] : ["0px", "0px", "1px", "4px"],
+    [1, 0.5, 0.2, 0],
+    isMobile ? ["0px", "0px", "0px", "0px"] : ["0px", "1px", "3px", "4px"],
   );
 
   return (
@@ -269,7 +245,7 @@ function FloatingImage({
         filter: useTransform(() => `blur(${blur.get()})`),
         zIndex: item.zIndex,
       }}
-      className={`absolute ${item.width} ${item.height} overflow-hidden shadow-lg max-md:scale-75`}
+      className={`absolute ${item.width} ${item.height} max-md:scale-75`}
     >
       <Image
         src={item.src}

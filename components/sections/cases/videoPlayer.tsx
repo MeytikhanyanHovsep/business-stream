@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 
 interface VideoPlayerProps {
   src: string;
+  poster?: string;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -16,14 +17,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
     const isHoverSupported = window.matchMedia("(hover: hover)").matches;
 
     if (isHovered && isHoverSupported) {
-      const playPromise = videoRef.current.play();
-
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {});
-      }
+      videoRef.current.play().catch(() => {});
     } else {
       videoRef.current.pause();
-      videoRef.current.currentTime = 0;
     }
   }, [isHovered]);
 
@@ -37,12 +33,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
         <video
           ref={videoRef}
           src={src}
+          poster={poster}
           className="w-full h-full object-cover rounded"
           loop
           muted
           playsInline
+          preload="metadata"
         />
       </div>
+
       <div className="rounded-tl transition-opacity md:group-hover:opacity-100 opacity-0 border-white border-t-3 border-l-3 absolute top-0 left-0 w-[20px] h-[20px]" />
       <div className="rounded-tr transition-opacity md:group-hover:opacity-100 opacity-0 border-white border-t-3 border-r-3 absolute top-0 right-0 w-[20px] h-[20px]" />
       <div className="rounded-bl transition-opacity md:group-hover:opacity-100 opacity-0 border-white border-b-3 border-l-3 absolute bottom-0 left-0 w-[20px] h-[20px]" />

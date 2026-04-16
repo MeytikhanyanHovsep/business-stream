@@ -3,7 +3,7 @@ import { defineField, defineType } from "sanity";
 export const processSection = defineType({
   name: "processSection",
   title: "Настройки секции Процесс",
-  type: "document",
+  type: "object",
   fields: [
     defineField({
       name: "sectionIndex",
@@ -29,13 +29,25 @@ export const processSection = defineType({
       type: "text",
       rows: 3,
     }),
+    defineField({
+      name: "stepsList",
+      title: "Список шагов",
+      type: "array",
+      of: [
+        {
+          type: "reference",
+          to: [{ type: "step" }],
+        },
+      ],
+      description: "Выберите существующие шаги процесса",
+    }),
   ],
 });
 
 export const step = defineType({
   name: "step",
-  title: "Процесс (шаги)",
-  type: "document",
+  title: "Процесс (шаг)",
+  type: "document", // Оставляем документом, чтобы сохранить текущие данные
   fields: [
     defineField({
       name: "stepNumber",
@@ -43,6 +55,14 @@ export const step = defineType({
       type: "number",
       description:
         "Укажите 1, 2, 3 или 4, чтобы привязать текст к нужной иконке",
+    }),
+    defineField({
+      name: "icon",
+      title: "Иконка",
+      type: "image",
+      options: {
+        hotspot: true,
+      },
     }),
     defineField({
       name: "title",

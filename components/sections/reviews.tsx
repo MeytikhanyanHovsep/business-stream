@@ -12,7 +12,7 @@ import Image from "next/image";
 import Title from "../ui/title";
 
 interface ReviewData {
-  id: string; // Изменено на string для Sanity _id
+  id: string;
   companyImg?: string;
   text?: string;
   authorName?: string;
@@ -22,59 +22,19 @@ interface ReviewData {
   videoPrev: string;
 }
 
-interface ReviewsPageData {
-  settings: {
-    sectionIndex?: string;
-    sectionTitle?: string;
-    mainTitle?: string;
-  };
-  items: ReviewData[];
-}
-
 const BASE_OFFSET = 72;
 const ITEM_WIDTH = 64;
 
-const client = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: "production",
-  apiVersion: "2026-01-01",
-  useCdn: true,
-});
+type Props = {
+  data: any;
+};
 
-export default function ReviewsSlider() {
-  const [pageData, setPageData] = useState<ReviewsPageData | null>(null);
-
+export default function ReviewsSlider({ data }: Props) {
   const swiperRef = useRef<SwiperType | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await client.fetch(
-          `{
-            "settings": *[_type == "reviewsSection"][0],
-            "items": *[_type == "review"] | order(order asc) {
-              "id": _id,
-              "companyImg": companyImg.asset->url,
-              text,
-              authorName,
-              authorDate,
-              "authorAvatar": authorAvatar.asset->url,
-              "videoSrc": videoSrc.asset->url,
-              "videoPrev": videoPrev.asset->url
-            }
-          }`,
-        );
-        setPageData(res);
-      } catch (error) {
-        console.error("Sanity fetch error:", error);
-      }
-    };
-    fetchData();
-  }, []);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -83,10 +43,24 @@ export default function ReviewsSlider() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  if (!pageData || pageData.items.length === 0) return null;
+  if (!data || data.reviewsList.length === 0) return null;
 
-  const { settings, items } = pageData;
-  const TOTAL = items.length;
+  const items = data.reviewsList;
+
+  let displayItems = [...items];
+
+  if (displayItems.length > 0 && displayItems.length < 5) {
+    let dupIndex = 1;
+    while (displayItems.length < 5) {
+      displayItems = [
+        ...displayItems,
+        ...items.map((item) => ({ ...item, id: `${item.id}-dup-${dupIndex}` })),
+      ];
+      dupIndex++;
+    }
+  }
+
+  const TOTAL = displayItems.length;
   const counter = BASE_OFFSET + activeIndex;
 
   const handlePlayPause = async (id: string) => {
@@ -128,10 +102,11 @@ export default function ReviewsSlider() {
     >
       <Title
         gap={35}
-        title={settings?.sectionTitle || "отзывы"}
-        index={settings?.sectionIndex ? settings.sectionIndex : "[07] "}
+        title={data?.sectionTitle || "отзывы"}
+        index={data?.sectionIndex ? data.sectionIndex : "[07] "}
+        description={data?.description || null}
       >
-        {settings?.mainTitle ||
+        {data?.mainTitle ||
           "Нам доверяют события, где важны эмоции и репутация"}
       </Title>
 
@@ -151,19 +126,19 @@ export default function ReviewsSlider() {
             },
           }}
           loop={true}
-          className="w-full"
+          className="w-full "
           onSlideChange={(swiper) => {
             setActiveIndex(swiper.realIndex);
             stopAllVideos();
           }}
         >
-          {items.map((review, index) => (
+          {displayItems.map((review, index) => (
             <SwiperSlide
               key={review.id}
               className="h-auto! flex perspective-[1000px]"
             >
               <motion.div
-                className="relative w-full h-full transform-3d cursor-pointer"
+                className="relative max-[1400px]:h-[420px] w-full h-full transform-3d cursor-pointer"
                 initial={false}
                 animate={{
                   rotateY: isMobile ? 180 : activeIndex === index ? 180 : 0,
@@ -173,15 +148,15 @@ export default function ReviewsSlider() {
                   activeIndex === index && handlePlayPause(review.id)
                 }
               >
-                <div className="h-full! w-full border border-[#555555] pt-[34px] pl-[30px] pb-[60px] pr-[53px] gap-[60px] max-md:gap-10 max-md:p-5 flex flex-col justify-start bg-[#0a0a0a] backface-hidden">
+                <div className="h-full! w-full border border-[#555555] pt-[34px] pl-[30px] pb-[60px] pr-[53px] max-[1400px]:gap-[20px] gap-[60px] max-md:gap-10 max-md:p-5 flex flex-col justify-start bg-[#0a0a0a] backface-hidden">
                   <Image
                     width={95}
                     height={60}
                     src={review.companyImg || ""}
                     alt="company"
-                    className="w-[95px] h-min object-contain"
+                    className="max-w-[95px] w-max max-h-[60px] h-min object-contain"
                   />
-                  <p className="text-[#a1a1a1] whitespace-pre-wrap text-sm md:text-base leading-[131%] tracking-[-3%]">
+                  <p className="text-[#a1a1a1] whitespace-pre-wrap text-sm md:text-base leading-[131%] tracking-[-3%] max-[1400px]:text-[14px]!">
                     {review.text}
                   </p>
                   <div className="flex items-center gap-4 mt-auto">
@@ -205,7 +180,7 @@ export default function ReviewsSlider() {
                   </div>
                 </div>
 
-                <div className="absolute inset-0 w-full h-full md:min-h-[534px] overflow-hidden group backface-hidden transform-[rotateY(180deg)]">
+                <div className="absolute inset-0 w-full h-full overflow-hidden group backface-hidden transform-[rotateY(180deg)]">
                   <div className="flex items-center h-full w-full relative justify-center">
                     <Image
                       alt="Bg"
@@ -215,12 +190,13 @@ export default function ReviewsSlider() {
                       src={review.videoPrev}
                     />
                     <video
+                      key={review.id}
                       ref={(el) => {
                         if (el) videoRefs.current.set(review.id, el);
                         else videoRefs.current.delete(review.id);
                       }}
                       className="absolute inset-0 w-full h-full object-contain"
-                      preload="metadata"
+                      preload="auto"
                       playsInline
                       loop
                       onEnded={() => setPlayingVideoId(null)}
@@ -322,7 +298,7 @@ export default function ReviewsSlider() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => swiperRef.current?.slidePrev()}
-            className="w-[56px] h-[56px] transition-colors hover:bg-[#252525] bg-[#141414] border border-white/5 grid place-items-center cursor-pointer"
+            className="w-[56px] h-[56px] transition-colors hover:bg-orange bg-[#141414] grid place-items-center cursor-pointer"
           >
             <Image
               src="/images/icons/left-arrow.svg"
@@ -333,7 +309,7 @@ export default function ReviewsSlider() {
           </button>
           <button
             onClick={() => swiperRef.current?.slideNext()}
-            className="w-[56px] h-[56px] transition-colors hover:bg-[#252525] bg-[#141414] border border-white/5 grid place-items-center cursor-pointer"
+            className="w-[56px] h-[56px] transition-colors hover:bg-orange bg-[#141414] grid place-items-center cursor-pointer"
           >
             <Image
               src="/images/icons/left-arrow.svg"

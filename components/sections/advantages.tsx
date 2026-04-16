@@ -15,15 +15,16 @@ interface AdvantageItem {
   title: string;
   desc: string;
 }
-
-interface AdvantagesSectionData {
-  sectionIndex?: string;
-  sectionTitle?: string;
-  mainTitle?: string;
-  titleDescription?: string;
-  leftTopText?: string;
-  rightTopText?: string;
-  items?: AdvantageItem[];
+interface AdvantagesProps {
+  data?: {
+    sectionIndex?: string;
+    sectionTitle?: string;
+    mainTitle?: string;
+    titleDescription?: string;
+    leftTopText?: string;
+    rightTopText?: string;
+    items?: AdvantageItem[];
+  };
 }
 
 const defaultItems: AdvantageItem[] = [
@@ -53,24 +54,7 @@ const defaultItems: AdvantageItem[] = [
   },
 ];
 
-export default function Advantages() {
-  const [data, setData] = useState<AdvantagesSectionData | null>(null);
-
-  useEffect(() => {
-    const fetchAdvantages = async () => {
-      try {
-        const res = await client.fetch<AdvantagesSectionData>(
-          `*[_type == "advantagesSection"][0]`,
-        );
-        setData(res);
-      } catch (error) {
-        console.error("Sanity fetch error:", error);
-      }
-    };
-
-    fetchAdvantages();
-  }, []);
-
+export default function Advantages({ data }: AdvantagesProps) {
   const currentItems =
     data?.items && data.items.length > 0 ? data.items : defaultItems;
 

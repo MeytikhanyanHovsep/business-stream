@@ -17,45 +17,15 @@ interface CaseItem {
   customer: string;
   task: string;
   videoSrc: string;
+  previewUrl?: string;
 }
 
-interface CasesPageData {
-  settings: {
-    sectionIndex?: string;
-    sectionTitle?: string;
-    mainTitle?: string;
-    description?: string;
-  };
-  items: CaseItem[];
-}
+type Props = {
+  data: any;
+};
 
-export default function Projects() {
-  const [data, setData] = useState<CasesPageData | null>(null);
+export default function Projects({ data }: Props) {
   const [modalVideoSrc, setModalVideoSrc] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchCases = async () => {
-      try {
-        const result = await client.fetch(
-          `{
-            "settings": *[_type == "casesSection"][0],
-            "items": *[_type == "case"] | order(order asc) {
-              _id,
-              customer,
-              task,
-              "videoSrc": video.asset->url
-            }
-          }`,
-        );
-        setData(result);
-      } catch (error) {
-        console.error("Sanity fetch error:", error);
-      }
-    };
-
-    fetchCases();
-  }, []);
-
   useEffect(() => {
     if (modalVideoSrc) {
       document.body.style.overflow = "hidden";
@@ -67,9 +37,9 @@ export default function Projects() {
     };
   }, [modalVideoSrc]);
 
-  if (!data || data.items.length === 0) return null;
+  if (!data) return null;
 
-  const { settings, items } = data;
+  const { casesList } = data;
 
   return (
     <>
@@ -78,36 +48,36 @@ export default function Projects() {
           gap={24}
           description={
             <span style={{ whiteSpace: "pre-line" }}>
-              {settings?.description ||
+              {data?.description ||
                 `Снимаем эмоции, масштаб и человеческие истории. Работаем с PR- и \n маркетинг- отделами, берём на себя организацию видеосъемки \n и трансляций «под ключ»`}
             </span>
           }
-          title={settings?.sectionTitle || "Кейсы"}
-          index={settings?.sectionIndex || "[06]"}
+          title={data?.sectionTitle || "Кейсы"}
+          index={data?.sectionIndex || "[06]"}
         >
           <span style={{ whiteSpace: "pre-line" }}>
-            {settings?.mainTitle ||
+            {data?.mainTitle ||
               "Кейсы видеосъёмки и онлайн- \n трансляций мероприятий"}
           </span>
         </Title>
 
         <div className="grid grid-cols-1 md:mt-[-54px] max-md:gap-[37px] sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-21">
-          {items.map((item, index) => (
+          {casesList.map((item, index) => (
             <div
-              key={item._id}
+              key={index}
               className="group relative flex flex-col transition-all duration-500 ease-in-out cursor-pointer"
               onClick={() => setModalVideoSrc(item.videoSrc)}
             >
-              <VideoPlayer src={item.videoSrc} />
+              <VideoPlayer src={item.videoSrc} poster={item.previewUrl} />
 
               <div className="flex justify-between items-start mt-4 gap-4">
                 <div className="flex flex-col gap-1.5 text-sm">
-                  <p className="font-normal text-[17px] text-white">
+                  <h3 className="font-normal text-[17px] text-white">
                     Заказчик: {item.customer}
-                  </p>
-                  <p className="font-normal text-[15px] text-white/64 leading-[131%] tracking-[-3%] ">
+                  </h3>
+                  <h3 className="font-normal text-[15px] text-white/64 leading-[131%] tracking-[-3%] ">
                     Задача: {item.task}
-                  </p>
+                  </h3>
                 </div>
                 <span className="text-white/40 flex items-center gap-2 text-[15px] font-sans leading-[133%] tracking-[-2%] max-md:absolute top-[10px] right-[12px]">
                   {"[  "} <span>{String(index + 1).padStart(2, "0")}</span>{" "}

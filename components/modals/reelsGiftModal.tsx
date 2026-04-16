@@ -3,21 +3,34 @@
 import React, { useState, useEffect } from "react";
 import { useModalStore } from "@/store/useModalStore";
 import Link from "next/link";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
-const ReelsGiftModal = () => {
+const ReelsGiftModal = ({ data }: { data?: any }) => {
   const { activeModal, closeModal } = useModalStore();
   const [isPolicyChecked, setIsPolicyChecked] = useState(true);
-
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [formData, setFormData] = useState({ fio: "", phone: "" });
-  const [errors, setErrors] = useState({ fio: false, phone: false });
+  const [isSending, setIsSending] = useState(false);
+
+  const [formData, setFormData] = useState({
+    fio: "",
+    phone: "",
+    email: "",
+  });
+
+  const [errors, setErrors] = useState({
+    fio: false,
+    phone: false,
+    email: false,
+  });
 
   useEffect(() => {
     if (activeModal === null) {
       const timer = setTimeout(() => {
         setIsSubmitted(false);
-        setFormData({ fio: "", phone: "" });
-        setErrors({ fio: false, phone: false });
+        setIsSending(false);
+        setFormData({ fio: "", phone: "", email: "" });
+        setErrors({ fio: false, phone: false, email: false });
       }, 300);
       return () => clearTimeout(timer);
     }
@@ -25,24 +38,52 @@ const ReelsGiftModal = () => {
 
   if (activeModal !== "reels") return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const newErrors = {
       fio: formData.fio.trim().length < 2,
-      phone: formData.phone.trim().length < 10,
+      email: !validateEmail(formData.email),
+      phone: formData.phone.replace(/\D/g, "").length < 8,
     };
 
     setErrors(newErrors);
 
-    if (!newErrors.fio && !newErrors.phone && isPolicyChecked) {
-      setIsSubmitted(true);
+    if (
+      !newErrors.fio &&
+      !newErrors.phone &&
+      !newErrors.email &&
+      isPolicyChecked
+    ) {
+      setIsSending(true);
+      try {
+        const response = await fetch(`https://formspree.io/f/mgoroyez`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            _subject: `Новая заявка на Reels: ${formData.fio}`,
+          }),
+        });
+
+        if (response.ok) {
+          setIsSubmitted(true);
+        }
+      } catch (error) {
+        console.error("Ошибка отправки:", error);
+      } finally {
+        setIsSending(false);
+      }
     }
   };
 
   if (isSubmitted) {
     return (
-      <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-500 flex items-center justify-center p-4">
         <div
           className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
           onClick={closeModal}
@@ -76,10 +117,11 @@ const ReelsGiftModal = () => {
           </div>
 
           <h2 className="text-[24px] font-semibold text-white mb-2">
-            Спасибо за вашу заявку!
+            {data?.successTitle || "Спасибо за вашу заявку!"}
           </h2>
           <p className="text-white/50 text-[14px]">
-            Мы свяжемся с вами и пришлём Reels в подарок.
+            {data?.successSubtitle ||
+              "Мы свяжемся с вами и пришлём Reels в подарок."}
           </p>
         </div>
       </div>
@@ -87,139 +129,202 @@ const ReelsGiftModal = () => {
   }
 
   return (
-    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
-        onClick={closeModal}
-      />
+    <>
+      <style>{`
+        .react-tel-input .form-control {
+          width: 100% !important;
+          background: #1c1c1f !important;
+          border: none !important;
+          border-radius: 8px !important;
+          padding: 13px 16px 13px 48px !important;
+          color: white !important;
+          height: auto !important;
+          font-family: inherit !important;
+          font-size: 16px !important;
+        }
+        .react-tel-input .flag-dropdown {
+          background: transparent !important;
+          border: none !important;
+          border-radius: 8px 0 0 8px !important;
+        }
+        .react-tel-input .selected-flag {
+          background: transparent !important;
+          padding: 0 0 0 12px !important;
+          width: 40px !important;
+        }
+        .react-tel-input .selected-flag:hover, 
+        .react-tel-input .selected-flag:focus {
+          background: transparent !important;
+        }
+        .react-tel-input .country-list {
+          background: #1c1c1f !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          border-radius: 8px !important;
+          color: white !important;
+          margin-top: 4px !important;
+        }
+        .react-tel-input .country-list .country:hover,
+        .react-tel-input .country-list .country.highlight {
+          background: rgba(255, 255, 255, 0.05) !important;
+        }
+      `}</style>
 
-      <div className="relative w-full max-w-[538px] bg-[#0D0E13] rounded-2xl border border-white/10 px-5 pb-6 pt-7 md:p-10 md:pb-9 shadow-2xl">
-        <button
+      <div className="fixed inset-0 z-500 flex items-center justify-center p-4">
+        <div
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
           onClick={closeModal}
-          className="absolute top-6 right-6 text-[#ffffffa6] hover:text-white transition-colors p-1 cursor-pointer"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M18 6L6 18M6 6L18 18"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
+        />
 
-        <div className="mb-7">
-          <h2 className="text-[20px] md:text-[24px] text-white mb-2 tracking-tight">
-            Получить Reels в подарок
-          </h2>
-          <p className="text-white/50 text-[14px] leading-relaxed">
-            Оставьте контакты — и мы пришлём Reels с вашего мероприятия в
-            подарок
-          </p>
-        </div>
-
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-[6px]">
-            <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
-              ФИО
-            </label>
-            <input
-              type="text"
-              placeholder="Иванов Иван Иванович"
-              value={formData.fio}
-              onChange={(e) => {
-                setFormData({ ...formData, fio: e.target.value });
-                if (errors.fio) setErrors({ ...errors, fio: false });
-              }}
-              className={`w-full bg-[#1c1c1f] border rounded-[8px] px-4 py-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors ${
-                errors.fio
-                  ? "border-orange"
-                  : "border-white/5 focus:border-white"
-              }`}
-            />
-            {errors.fio && (
-              <p className="text-orange text-[12px] ml-1">Введите ваше ФИО</p>
-            )}
-          </div>
-
-          <div className="space-y-[6px]">
-            <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
-              Телефон
-            </label>
-            <input
-              type="tel"
-              placeholder="+7 (___) ___-__-__"
-              value={formData.phone}
-              onChange={(e) => {
-                setFormData({ ...formData, phone: e.target.value });
-                if (errors.phone) setErrors({ ...errors, phone: false });
-              }}
-              className={`w-full bg-[#1c1c1f] border rounded-[8px] px-4 py-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors ${
-                errors.phone
-                  ? "border-orange"
-                  : "border-white/5 focus:border-white"
-              }`}
-            />
-            {errors.phone && (
-              <p className="text-orange text-[12px] ml-1">
-                Введите корректный номер телефона
-              </p>
-            )}
-          </div>
-
-          <div className="flex gap-3 pt-2 items-start">
-            <div className="relative flex items-center justify-center mt-[2px]">
-              <input
-                type="checkbox"
-                id="policy-reels"
-                checked={isPolicyChecked}
-                onChange={() => setIsPolicyChecked(!isPolicyChecked)}
-                className="peer h-5 w-5 shrink-0 appearance-none rounded border border-white/10 bg-[#1c1c1f] checked:border-orange transition-all cursor-pointer"
+        <div className="relative w-full max-w-[538px] bg-[#0D0E13] rounded-2xl border border-white/10 px-5 pb-6 pt-7 md:p-10 md:pb-9 shadow-2xl">
+          <button
+            onClick={closeModal}
+            className="absolute top-6 right-6 text-[#ffffffa6] hover:text-white transition-colors p-1 cursor-pointer"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M18 6L6 18M6 6L18 18"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
-              <div className="absolute pointer-events-none text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-                <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
-                  <path
-                    d="M1 4L4.5 7.5L11 1"
-                    stroke="#FB4114"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+            </svg>
+          </button>
+
+          <div className="mb-7">
+            <h2 className="text-[20px] md:text-[24px] text-white mb-2 tracking-tight">
+              {data?.title || "Получить Reels в подарок"}
+            </h2>
+            <p className="text-white/50 text-[14px] leading-relaxed">
+              {data?.subtitle ||
+                "Оставьте контакты — и мы пришлём Reels с вашего мероприятия в подарок"}
+            </p>
+          </div>
+
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            <div className="space-y-[6px]">
+              <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
+                {data?.fioLabel || "ФИО"}
+              </label>
+              <input
+                type="text"
+                placeholder={data?.fioPlaceholder || "Иванов Иван Иванович"}
+                value={formData.fio}
+                onChange={(e) => {
+                  setFormData({ ...formData, fio: e.target.value });
+                  if (errors.fio) setErrors({ ...errors, fio: false });
+                }}
+                className={`w-full bg-[#1c1c1f] border rounded-[8px] px-4 py-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors ${
+                  errors.fio
+                    ? "border-orange"
+                    : "border-white/5 focus:border-white"
+                }`}
+              />
+            </div>
+
+            <div className="space-y-[6px]">
+              <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
+                {data?.emailLabel || "Email"}
+              </label>
+              <input
+                type="email"
+                placeholder={data?.emailPlaceholder || "example@mail.ru"}
+                value={formData.email}
+                onChange={(e) => {
+                  setFormData({ ...formData, email: e.target.value });
+                  if (errors.email) setErrors({ ...errors, email: false });
+                }}
+                className={`w-full bg-[#1c1c1f] border rounded-[8px] px-4 py-[13px] text-white placeholder:text-white/20 focus:outline-none transition-colors ${
+                  errors.email
+                    ? "border-orange"
+                    : "border-white/5 focus:border-white"
+                }`}
+              />
+              {errors.email && (
+                <p className="text-orange text-[10px] ml-1">
+                  Введите корректный email
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-[6px]">
+              <label className="text-[12px] uppercase tracking-widest text-[#ffffffa6] font-medium ml-1">
+                {data?.phoneLabel || "Телефон"}
+              </label>
+              <div
+                className={`relative w-full border rounded-[8px] transition-colors ${
+                  errors.phone
+                    ? "border-orange"
+                    : "border-white/5 focus-within:border-white"
+                }`}
+              >
+                <PhoneInput
+                  country={"ru"}
+                  value={formData.phone}
+                  onChange={(phone) => {
+                    setFormData({ ...formData, phone });
+                    if (errors.phone) setErrors({ ...errors, phone: false });
+                  }}
+                  enableSearch={true}
+                  containerClass="w-full"
+                />
               </div>
             </div>
-            <label
-              htmlFor="policy-reels"
-              className="text-[11px] leading-[1.4] text-[#ffffff73] cursor-pointer select-none"
-            >
-              Нажимая «Получить», вы соглашаетесь с{" "}
-              <Link
-                href="/privacy-policy"
-                className="underline hover:text-white transition-colors cursor-pointer"
-              >
-                политикой конфиденциальности
-              </Link>{" "}
-              и даёте{" "}
-              <Link
-                href="/consent"
-                className="underline hover:text-white transition-colors cursor-pointer"
-              >
-                согласие на обработку персональных данных
-              </Link>
-            </label>
-          </div>
 
-          <button
-            type="submit"
-            className="w-full bg-white text-black text-[15px] py-4 rounded-[7px] hover:bg-white/90 transition-all active:scale-[0.98] mt-1 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-medium"
-            disabled={!isPolicyChecked}
-          >
-            Получить
-          </button>
-        </form>
+            <div className="flex gap-3 pt-2 items-start">
+              <div className="relative flex items-center justify-center mt-[2px]">
+                <input
+                  type="checkbox"
+                  id="policy-reels"
+                  checked={isPolicyChecked}
+                  onChange={() => setIsPolicyChecked(!isPolicyChecked)}
+                  className="peer h-5 w-5 shrink-0 appearance-none rounded border border-white/10 bg-[#1c1c1f] checked:border-orange transition-all cursor-pointer"
+                />
+                <div className="absolute pointer-events-none text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                  <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+                    <path
+                      d="M1 4L4.5 7.5L11 1"
+                      stroke="#FB4114"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <label
+                htmlFor="policy-reels"
+                className="text-[11px] leading-[1.4] text-[#ffffff73] cursor-pointer select-none"
+              >
+                {data?.policyText1 || "Нажимая «Получить», вы соглашаетесь с"}{" "}
+                <Link
+                  href="/privacy"
+                  className="underline hover:text-white transition-colors cursor-pointer"
+                >
+                  {data?.policyLink1 || "политикой конфиденциальности"}
+                </Link>{" "}
+                {data?.policyText2 || "и даёте"}{" "}
+                <Link
+                  href="/consent"
+                  className="underline hover:text-white transition-colors cursor-pointer"
+                >
+                  {data?.policyLink2 ||
+                    "согласие на обработку персональных данных"}
+                </Link>
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-white text-black text-[15px] py-4 rounded-[7px] hover:bg-white/90 transition-all active:scale-[0.98] mt-1 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-medium"
+              disabled={!isPolicyChecked || isSending}
+            >
+              {isSending ? "Отправка..." : data?.submitButtonText || "Получить"}
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -12,76 +12,38 @@ const staticIcons = [
   { icon: "edit.svg", width: 34 },
 ];
 
-interface StepData {
-  stepNumber: number;
-  title: string;
-  description: string;
-}
+type Props = {
+  data: any;
+};
 
-interface ProcessPageData {
-  settings: {
-    sectionIndex?: string;
-    sectionTitle?: string;
-    mainTitle?: string;
-    description?: string;
-  };
-  steps: StepData[];
-}
+export default function Process({ data }: Props) {
+  if (!data || data.stepsList.length === 0) return null;
 
-const client = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: "production",
-  apiVersion: "2026-01-01",
-  useCdn: true,
-});
-
-export default function Process() {
-  const [pageData, setPageData] = useState<ProcessPageData | null>(null);
-
-  useEffect(() => {
-    const fetchProcessData = async () => {
-      try {
-        const result = await client.fetch(
-          `{
-            "settings": *[_type == "processSection"][0],
-            "steps": *[_type == "step"] | order(stepNumber asc)
-          }`,
-        );
-        setPageData(result);
-      } catch (error) {
-        console.error("Sanity error:", error);
-      }
-    };
-    fetchProcessData();
-  }, []);
-
-  if (!pageData || pageData.steps.length === 0) return null;
-
-  const { settings, steps } = pageData;
+  const { stepsList } = data;
 
   return (
     <section id="process" className="pt-[245px] max-lg:pt-[80px] container">
       <Title
         description={
           <span style={{ whiteSpace: "pre-line" }}>
-            {settings?.description ||
+            {data?.description ||
               `Всё прозрачно и под контролем: вы всегда \n знаете, что, когда и как мы делаем`}
           </span>
         }
-        title={settings?.sectionTitle || "Процесс и гарантии"}
-        index={settings?.sectionIndex || "[07] "}
+        title={data?.sectionTitle || "Процесс и гарантии"}
+        index={data?.sectionIndex || "[07] "}
       >
         <span style={{ whiteSpace: "pre-line" }}>
-          {settings?.mainTitle ||
+          {data?.mainTitle ||
             "Как проходит видеосъёмка и почему наши трансляции не срываются"}
         </span>
       </Title>
 
       <div className="max-sm:overflow-x-auto no-scrollbar">
         <div className="sm:mt-[150px]! gap-[30px] w-full grid max-lg:grid-cols-2 max-sm:grid-cols-4 max-sm:min-w-max max-lg:gap-y-[140px] max-sm:gap-[14px] grid-cols-4">
-          {steps.map((e, i) => {
-            // Привязка иконки идет по индексу (0, 1, 2, 3)
+          {stepsList.map((e, i) => {
             const iconInfo = staticIcons[i] || staticIcons[0];
+            const hasCustomIcon = !!e.icon;
 
             return (
               <div
@@ -94,10 +56,17 @@ export default function Process() {
 
                 <div className="h-[42px] max-sm:h-[31px] flex items-center">
                   <Image
-                    src={`/images/icons/${iconInfo.icon}`}
-                    height={iconInfo.width}
-                    width={iconInfo.width}
+                    src={
+                      hasCustomIcon
+                        ? (e.icon as string)
+                        : `/images/icons/${iconInfo.icon}`
+                    }
+                    height={hasCustomIcon ? 42 : iconInfo.width}
+                    width={hasCustomIcon ? 42 : iconInfo.width}
                     alt="icon"
+                    className={
+                      hasCustomIcon ? "w-auto h-full object-contain" : ""
+                    }
                   />
                 </div>
 

@@ -6,68 +6,34 @@ import Title from "../ui/title";
 import Image from "next/image";
 import { createClient } from "next-sanity";
 
-const client = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: "production",
-  apiVersion: "2026-01-01",
-  useCdn: true,
-});
-
 interface FaqItem {
   question: string;
   answer: string;
 }
 
-interface FaqPageData {
-  settings: {
-    sectionIndex?: string;
-    sectionTitle?: string;
-    mainTitle?: string;
-  };
-  items: FaqItem[];
-}
+type Props = {
+  data: any;
+};
 
-export default function Faq() {
-  const [pageData, setPageData] = useState<FaqPageData | null>(null);
+export default function Faq({ data }: Props) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchFaq = async () => {
-      try {
-        const data = await client.fetch(
-          `{
-            "settings": *[_type == "faqSection"][0],
-            "items": *[_type == "faq"] | order(order asc) {
-              question,
-              answer
-            }
-          }`,
-        );
-        setPageData(data);
-      } catch (error) {
-        console.error("Sanity fetch error:", error);
-      }
-    };
+  if (!data) return null;
 
-    fetchFaq();
-  }, []);
-
-  if (!pageData) return null;
-
-  const { settings, items } = pageData;
+  const { faqList } = data;
 
   return (
     <section id="faq" className="pt-[245px] max-lg:pt-[83px] container">
       <Title
         gap={20}
-        title={settings?.sectionTitle || "FAQ"}
-        index={settings?.sectionIndex || "[08] "}
+        title={data?.sectionTitle || "FAQ"}
+        index={data?.sectionIndex || "[08] "}
       >
-        {settings?.mainTitle ||
+        {data?.mainTitle ||
           "Простые ответы на вопросы, которые задают наши клиенты"}
       </Title>
       <div className="flex flex-col gap-3">
-        {items.map((item, index) => {
+        {faqList.map((item, index) => {
           const isOpen = openIndex === index;
 
           return (

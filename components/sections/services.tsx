@@ -1,67 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Title from "../ui/title";
 import Image from "next/image";
-import { createClient } from "next-sanity";
-import imageUrlBuilder, { SanityImageSource } from "@sanity/image-url";
 
-interface ServiceData {
-  title: string;
-  desc: string[];
-  img: SanityImageSource;
-  tags: string[];
-  order: number;
-  imgColor: "light" | "dark";
-}
-
-interface ServicesPageData {
-  settings: {
-    sectionIndex?: string;
-    sectionTitle?: string;
-    mainTitle?: string;
-    subTitle?: string;
-  };
-  services: ServiceData[];
-}
-
-const client = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: "production",
-  apiVersion: "2026-01-01",
-  useCdn: true,
-});
-
-const builder = imageUrlBuilder(client);
-function urlFor(source: SanityImageSource) {
-  return builder.image(source);
-}
-
-export default function Services() {
-  const [data, setData] = useState<ServicesPageData | null>(null);
+export default function Services({ data }: any) {
   const [activeService, setActiveService] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        // Запрос сразу и настроек, и всех услуг
-        const result = await client.fetch(`{
-          "settings": *[_type == "servicesSection"][0],
-          "services": *[_type == "service"] | order(order asc)
-        }`);
-        setData(result);
-      } catch (error) {
-        console.error("Sanity fetch error:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAllData();
-  }, []);
-
-  const services = data?.services || [];
-  const settings = data?.settings;
+  const services = data?.servicesList || [];
 
   const changeActive = (number: 1 | -1) => {
     if (services.length === 0) return;
@@ -72,7 +18,7 @@ export default function Services() {
     }
   };
 
-  if (loading || services.length === 0) return null;
+  if (!services.length) return null;
 
   return (
     <section
@@ -82,23 +28,22 @@ export default function Services() {
       <div className="max-md:px-[19px]">
         <Title
           gap={80}
-          title={settings?.sectionTitle || "Услуги"}
-          index={settings?.sectionIndex || "[04] "}
+          title={data?.sectionTitle || "Услуги"}
+          index={data?.sectionIndex || "[04] "}
         >
           <span style={{ whiteSpace: "pre-line" }}>
-            {settings?.mainTitle || "Услуги видеосъемки событий и трансляций"}
+            {data?.mainTitle || "Услуги видеосъемки событий и трансляций"}
           </span>
           <br />
           <span className="max-md:hidden opacity-56 font-normal text-[15px] leading-[133%] tracking-[-3%]">
             <span style={{ whiteSpace: "pre-line" }}>
-              {settings?.subTitle ||
+              {data?.subTitle ||
                 "Выберите услугу, которая ближе к вашему формату события"}
             </span>
           </span>
         </Title>
       </div>
 
-      {/* Навигация по услугам */}
       <div className="overflow-x-auto w-auto max-md:px-[19px] services-box">
         <div className="flex min-w-[1499px] max-2xl:max-w-[1350px] max-2xl:min-w-[1349px] services-box justify-stretch w-full">
           {services.map((e, i) => (
@@ -119,7 +64,6 @@ export default function Services() {
         </div>
       </div>
 
-      {/* Контент активной услуги */}
       <div className="pt-[126px] max-md:pt-[30px] max-md:gap-[25px] max-lg:grid-cols-2 max-md:grid-cols-1 gap-[80px] grid grid-cols-3 ">
         <div className="max-md:px-[19px] gap-[16px] max-md:order-2 flex">
           <div className="min-w-[11px] mt-[14px] max-md:h-[6px] max-md:min-w-[6px] max-md:mt-[9px] h-[11px] bg-orange rounded-full"></div>
@@ -166,13 +110,15 @@ export default function Services() {
               </div>
             ))}
           </div>
-          <Image
-            height={400}
-            width={500}
-            className="h-[337px] max-md:h-[295px] max-md:w-full object-cover"
-            src={urlFor(services[activeService].img).url()}
-            alt={services[activeService].title}
-          />
+          {services[activeService].img && (
+            <Image
+              height={400}
+              width={500}
+              className="h-[337px] max-md:h-[295px] max-md:w-full object-cover"
+              src={services[activeService].img}
+              alt={services[activeService].title}
+            />
+          )}
         </div>
       </div>
 

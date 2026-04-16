@@ -25,7 +25,9 @@ const client = createClient({
   useCdn: true,
 });
 
-// Данные со скриншота как начальное состояние
+type Props = {
+  data: any;
+};
 const defaultItems: AboutItem[] = [
   {
     value: "300+",
@@ -44,23 +46,7 @@ const defaultItems: AboutItem[] = [
   },
 ];
 
-export default function About() {
-  const [data, setData] = useState<AboutSectionData | null>(null);
-
-  useEffect(() => {
-    const fetchAbout = async () => {
-      try {
-        const res = await client.fetch<AboutSectionData>(
-          `*[_type == "aboutSection"][0]`,
-        );
-        setData(res);
-      } catch (error) {
-        console.error("Sanity error:", error);
-      }
-    };
-    fetchAbout();
-  }, []);
-
+export default function About({ data }: Props) {
   const currentItems =
     data?.items && data.items.length > 0
       ? [...data.items].sort((a, b) => a.order - b.order)

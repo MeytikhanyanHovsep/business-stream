@@ -133,3 +133,41 @@
     padding-right: 19px;
   }
 }
+
+.custom-phone-input .selected-flag {
+  background: transparent !important;
+}
+
+.custom-phone-input .country-list {
+  background: #1c1c1f !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.custom-phone-input .country-list .country:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.custom-phone-input .country-list .country.highlight {
+  background: rgba(255, 107, 0, 0.1) !important;
+}
+
+.portable-content ul {
+  list-style-type: disc;
+  padding-left: 1.4em;
+  margin-top: 10px;
+}
+
+.portable-content li {
+  margin-bottom: 6px;
+}
+
+.portable-content a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: rgba(255, 255, 255, 0.65);
+  transition: color 0.2s;
+}
+
+.portable-content a:hover {
+  color: white;
+}
