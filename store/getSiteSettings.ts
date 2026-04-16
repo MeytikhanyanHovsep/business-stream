@@ -8,7 +8,8 @@ const client = createClient({
 });
 
 export async function getSiteSettings() {
-  return await client.fetch(`*[_type == "settings"][0]{
+  return await client.fetch(
+    `*[_type == "settings"][0]{
 ...,
     title,
     description,
@@ -17,5 +18,10 @@ export async function getSiteSettings() {
     headScripts,
     bodyScripts,
     robotsText,
-  }`);
+  }`,
+    {},
+    {
+      next: { revalidate: 60 },
+    },
+  );
 }

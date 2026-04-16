@@ -131,7 +131,13 @@ async function getPageData(slug: string): Promise<PageData | null> {
   }
   }
 }`;
-  return await client.fetch(query, { slug });
+  return await client.fetch(
+    query,
+    { slug },
+    {
+      next: { revalidate: 60 },
+    },
+  );
 }
 export default async function Home() {
   const [data, modalsData] = await Promise.all([
