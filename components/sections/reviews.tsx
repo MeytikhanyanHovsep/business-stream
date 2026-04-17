@@ -256,7 +256,7 @@ export default function ReviewsSlider({ data }: Props) {
             />
           </div>
 
-          <div className="flex items-center justify-center w-full h-full [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] relative">
+          <div className="flex items-center justify-center w-full h-full mask-[linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] relative">
             <motion.div
               className="flex items-center absolute left-1/2"
               initial={false}
@@ -275,7 +275,7 @@ export default function ReviewsSlider({ data }: Props) {
                   >
                     <span
                       onClick={() => swiperRef.current?.slideToLoop(num - 1)}
-                      className={`w-[32px] text-center cursor-pointer transition-all duration-500 font-medium tracking-[0.1em] ${
+                      className={`w-[32px] text-center cursor-pointer transition-all duration-500 font-medium  ${
                         isActive
                           ? "text-white scale-20"
                           : "text-white text-[16px]"

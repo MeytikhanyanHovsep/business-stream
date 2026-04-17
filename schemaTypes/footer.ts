@@ -135,6 +135,7 @@ export default defineType({
                   { title: "Отзывы", value: "#reviews" },
                   { title: "FAQ", value: "#faq" },
                   { title: "Контакты", value: "#contacts" },
+                  { title: "Галерея", value: "#gallery" },
                 ],
               },
             },

@@ -10,7 +10,6 @@ import Reviews from "@/components/sections/reviews";
 import Quiz from "@/components/sections/quiz";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import Modals from "@/components/modals";
 
 const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
@@ -30,45 +29,6 @@ interface PageData {
   sections: SanitySection[];
   footerConfig: any;
 }
-
-async function getModalsData(): Promise<any> {
-  const query = `{
-    "contact": *[_type == "modalContact"][0],
-    "discuss": *[_type == "modalDiscuss"][0],
-    "reels": *[_type == "modalReels"][0],
-    "audit": *[_type == "modalAudit"][0] {
-      ...,
-      "steps": steps[] {
-        ...,
-        "options": options[]
-      }
-    }
-  }`;
-  try {
-    return await client.fetch(
-      query,
-      {},
-      {
-        next: { revalidate: 0 },
-      },
-    );
-  } catch (error) {
-    console.error("Sanity Modals Fetch Error:", error);
-    return null;
-  }
-}
-
-// "headerData": headerConfig->{
-//     ...,
-//     "logoUrl": logo.asset->url
-//   },
-//   "footerData": footerConfig->{
-//     ...,
-//     "menu": menu[] {
-//       label,
-//       "target": target
-//     }
-//   },
 
 async function getPageData(slug: string): Promise<PageData | null> {
   const query = `*[_type == "page" && slug.current == $slug][0]{
@@ -146,17 +106,13 @@ async function getPageData(slug: string): Promise<PageData | null> {
   );
 }
 export default async function Home() {
-  const [data, modalsData] = await Promise.all([
-    getPageData("index"),
-    getModalsData(),
-  ]);
+  const data = await getPageData("index");
 
   if (!data?.sections) return null;
 
   const advantagesData = data.sections.find(
     (s) => s._type === "advantagesSection",
   );
-  console.log(data);
 
   return (
     <>
@@ -192,7 +148,7 @@ export default async function Home() {
             return null;
         }
       })}
-      <Modals data={modalsData} />
+
       <Footer data={data.footerConfig} />
     </>
   );

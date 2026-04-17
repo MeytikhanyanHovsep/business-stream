@@ -39,7 +39,7 @@ export default function Footer({ data }: FooterProps) {
   const menu = data?.menu?.length
     ? data.menu
     : [
-        { label: "Главная", target: "#home" },
+        { label: "Главная", target: "#hero" },
         { label: "Преимущества", target: "#advantages" },
         { label: "О нас", target: "#about" },
         { label: "Тарифы", target: "#pricing" },
@@ -51,13 +51,13 @@ export default function Footer({ data }: FooterProps) {
 
   const handleScroll = (target: string) => {
     lenis?.scrollTo(target, {
-      offset: target == "#home" ? -100 : 150,
+      offset: target == "#heri" ? -100 : 150,
       duration: 3,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
   };
 
-  if (path != "/") return null;
+  if (!data) return null;
 
   return (
     <footer
@@ -106,19 +106,23 @@ export default function Footer({ data }: FooterProps) {
                   href={
                     data?.phone
                       ? `tel:${data.phone.replace(/[^0-9+]/g, "")}`
-                      : "tel:+79110000000"
+                      : "tel:+78126027083"
                   }
                 >
-                  {data?.phone || "7 (911) 000-00-00"}
+                  {data?.phone || "+7 (812) 602-70-83"}
                 </a>
               </h2>
             </li>
             <li className="text-[17px] max-md:opacity-62 max-sm:text-[14px] tracking-[-3%] leading-[137%] uppercase">
               <h2>
-                <a href={data?.telegram ? data?.telegram : "#"}>
+                <a
+                  href={
+                    data?.telegram ? data?.telegram : "https://t.me/Bzstream"
+                  }
+                >
                   {data?.telegram
                     ? data.telegram.replace(/^https?:\/\/t\.me\//, "")
-                    : "telegram"}
+                    : "Bzstream"}
                 </a>
               </h2>
             </li>
@@ -126,14 +130,20 @@ export default function Footer({ data }: FooterProps) {
               <h2>
                 <a href={data?.email ? `mailto:${data.email}` : "#"}>
                   {" "}
-                  {data?.email || "mail"}
+                  {data?.email || "info@bzstream-studio.ru"}
                 </a>
               </h2>
             </li>
             <li className="text-[17px] max-md:opacity-62 max-sm:text-[14px] tracking-[-3%] leading-[137%] uppercase">
               <h2>
-                <a href={data?.addressurl ? data.addressurl : "#"}>
-                  {data?.address || "Санкт-Петербург, ул. Можайская 17"}
+                <a
+                  href={
+                    data?.addressurl
+                      ? data.addressurl
+                      : "https://yandex.com/maps/2/saint-petersburg/?ll=30.328146%2C59.915751&mode=whatshere&whatshere%5Bpoint%5D=30.326869%2C59.916392&whatshere%5Bzoom%5D=17.4&z=17.4&utm_source=share"
+                  }
+                >
+                  {data?.address || "Санкт-Петербург, Можайская 17"}
                 </a>
               </h2>
             </li>

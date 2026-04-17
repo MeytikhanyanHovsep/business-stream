@@ -65,6 +65,13 @@ const customComponents: PortableTextComponents = {
 type Props = { data: any };
 
 export default function Privacy({ data }: Props) {
+  const isContentEmpty =
+    !data?.content ||
+    (Array.isArray(data.content) &&
+      data.content.length === 1 &&
+      data.content[0].children?.length === 1 &&
+      data.content[0].children[0].text === "");
+
   return (
     <>
       <div className="bg-[#0a0a0a] text-white text-[16px] leading-[1.65] antialiased min-h-screen">
@@ -88,7 +95,7 @@ export default function Privacy({ data }: Props) {
           </p>
 
           <div className="space-y-[14px] text-[rgba(255,255,255,0.72)]">
-            {data?.content ? (
+            {!isContentEmpty ? (
               <PortableText
                 value={data.content}
                 components={customComponents}

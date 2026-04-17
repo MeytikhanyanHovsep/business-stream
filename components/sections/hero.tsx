@@ -62,7 +62,7 @@ export default function Hero({ data, advantagesData }: Props) {
       />
 
       <main
-        id="home"
+        id="hero"
         className="relative bg-linear-to-b from-black/50 via-black/50 to-black/0 z-10 w-full max-md:h-[759px] h-[817px]"
       >
         <div className="pt-[230px] h-full max-md:pt-[155px] container flex flex-col items-center">

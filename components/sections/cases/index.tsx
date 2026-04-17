@@ -36,11 +36,10 @@ export default function Projects({ data }: Props) {
       document.body.style.overflow = "";
     };
   }, [modalVideoSrc]);
-
   if (!data) return null;
 
-  const { casesList } = data;
-
+  const casesList = data.casesList ? data.casesList : data.projectsList;
+  console.log(casesList);
   return (
     <>
       <section id="cases" className="container max-lg:pt-[50px] pt-[280px]">
@@ -62,30 +61,31 @@ export default function Projects({ data }: Props) {
         </Title>
 
         <div className="grid grid-cols-1 md:mt-[-54px] max-md:gap-[37px] sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-21">
-          {casesList.map((item, index) => (
-            <div
-              key={index}
-              className="group relative flex flex-col transition-all duration-500 ease-in-out cursor-pointer"
-              onClick={() => setModalVideoSrc(item.videoSrc)}
-            >
-              <VideoPlayer src={item.videoSrc} poster={item.previewUrl} />
+          {casesList &&
+            casesList?.map((item, index) => (
+              <div
+                key={index}
+                className="group relative flex flex-col transition-all duration-500 ease-in-out cursor-pointer"
+                onClick={() => setModalVideoSrc(item.videoSrc)}
+              >
+                <VideoPlayer src={item.videoSrc} poster={item.previewUrl} />
 
-              <div className="flex justify-between items-start mt-4 gap-4">
-                <div className="flex flex-col gap-1.5 text-sm">
-                  <h3 className="font-normal text-[17px] text-white">
-                    Заказчик: {item.customer}
-                  </h3>
-                  <h3 className="font-normal text-[15px] text-white/64 leading-[131%] tracking-[-3%] ">
-                    Задача: {item.task}
-                  </h3>
+                <div className="flex justify-between items-start mt-4 gap-4">
+                  <div className="flex flex-col gap-1.5 text-sm">
+                    <h3 className="font-normal text-[17px] text-white">
+                      Заказчик: {item.customer}
+                    </h3>
+                    <h3 className="font-normal text-[15px] text-white/64 leading-[131%] tracking-[-3%] ">
+                      Задача: {item.task}
+                    </h3>
+                  </div>
+                  <span className="text-white/40 flex items-center gap-2 text-[15px] font-sans leading-[133%] tracking-[-2%] max-md:absolute top-[10px] right-[12px]">
+                    {"[  "} <span>{String(index + 1).padStart(2, "0")}</span>{" "}
+                    {"  ]"}
+                  </span>
                 </div>
-                <span className="text-white/40 flex items-center gap-2 text-[15px] font-sans leading-[133%] tracking-[-2%] max-md:absolute top-[10px] right-[12px]">
-                  {"[  "} <span>{String(index + 1).padStart(2, "0")}</span>{" "}
-                  {"  ]"}
-                </span>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </section>
 

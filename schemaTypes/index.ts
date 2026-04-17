@@ -15,6 +15,9 @@ import quizSection from "./quiz";
 import { modalContact, modalDiscuss, modalReels, modalAudit } from "./modals";
 import { privacyPage } from "./privacyPage";
 import { consentPage } from "./consentPage";
+import secondAbout from "./secondAbout";
+import secondHero from "./secondHero";
+import gallery from "./gallery";
 
 export const schemaTypes = [
   page,
@@ -43,4 +46,7 @@ export const schemaTypes = [
   modalAudit,
   privacyPage,
   consentPage,
+  secondAbout,
+  secondHero,
+  gallery,
 ];

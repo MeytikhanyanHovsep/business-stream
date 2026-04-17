@@ -13,6 +13,7 @@ const client = createClient({
 
 async function getData(): Promise<any> {
   const query = `*[_type == "privacyPage"][0]{
+  ...,
   label,
   title,
   lastUpdated,
@@ -32,7 +33,6 @@ async function getData(): Promise<any> {
 
 export default async function PrivacyPage() {
   const data: any = await getData();
-
   return (
     <>
       <Header data={data.headerConfig} />

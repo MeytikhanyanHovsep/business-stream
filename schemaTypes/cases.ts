@@ -3,7 +3,7 @@ import { defineField, defineType } from "sanity";
 export const casesSection = defineType({
   name: "casesSection",
   title: "Настройки секции Кейсы",
-  type: "object", // Теперь это объект для вставки в страницу
+  type: "object",
   fields: [
     defineField({
       name: "sectionIndex",
@@ -29,7 +29,6 @@ export const casesSection = defineType({
       type: "text",
       rows: 3,
     }),
-    // Поле для выбора кейсов по ссылке
     defineField({
       name: "casesList",
       title: "Список выбранных кейсов",
@@ -48,7 +47,7 @@ export const casesSection = defineType({
 export const caseItem = defineType({
   name: "case",
   title: "Кейсы (контент)",
-  type: "document", // Оставляем документом, чтобы данные сохранились в базе
+  type: "document",
   fields: [
     defineField({
       name: "customer",

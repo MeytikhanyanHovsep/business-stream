@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { PortableText } from "@portabletext/react";
 import { createClient } from "next-sanity";
 import Header from "@/components/header";
 import Consent from "@/components/consent";
@@ -13,6 +12,7 @@ const client = createClient({
 
 async function getData(): Promise<any> {
   const query = `*[_type == "consentPage"][0]{
+  ...,
   label,
   title,
   websiteUrl,

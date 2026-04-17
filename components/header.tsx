@@ -18,6 +18,7 @@ interface HeaderData {
   menu?: MenuItem[];
   btnContact?: string;
   backToMain?: string;
+  headerType?: string;
 }
 
 interface HeroData {
@@ -34,18 +35,18 @@ export default function Header({ data, dataButtons }: HeaderProps) {
   const [menuToggle, setMenuToggle] = useState<boolean>(false);
   const path = usePathname();
   const lenis = useLenis();
-  const [activeSection, setActiveSection] = useState<string>("home");
+  const [activeSection, setActiveSection] = useState<string>("hero");
   const currentMenu: MenuItem[] = data?.menu?.length
     ? data.menu
     : [
-        { label: "Главная", target: "home" },
-        { label: "Преимущества", target: "advantages" },
-        { label: "О нас", target: "about" },
-        { label: "Тарифы", target: "pricing" },
-        { label: "Кейсы", target: "cases" },
-        { label: "Отзывы", target: "reviews" },
-        { label: "FAQ", target: "faq" },
-        { label: "Контакты", target: "contacts" },
+        { label: "Главная", target: "#hero" },
+        { label: "Преимущества", target: "#advantages" },
+        { label: "О нас", target: "#about" },
+        { label: "Тарифы", target: "#pricing" },
+        { label: "Кейсы", target: "#cases" },
+        { label: "Отзывы", target: "#reviews" },
+        { label: "FAQ", target: "#faq" },
+        { label: "Контакты", target: "#contacts" },
       ];
 
   useEffect(() => {
@@ -77,8 +78,8 @@ export default function Header({ data, dataButtons }: HeaderProps) {
   }, [currentMenu]);
 
   const handleScroll = (target: string) => {
-    lenis?.scrollTo("#" + target, {
-      offset: target === "home" ? -100 : 150,
+    lenis?.scrollTo(target, {
+      offset: target === "#hero" ? -100 : 150,
       duration: 3,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
@@ -86,7 +87,7 @@ export default function Header({ data, dataButtons }: HeaderProps) {
 
   const logoSrc: string = data?.logoUrl || "/images/logo.png";
 
-  return path === "/" ? (
+  return data?.headerType && data.headerType === "withNavigation" ? (
     <>
       <header className="fixed z-200 container top-[23px] left-1/2 -translate-x-1/2">
         <div className="flex rounded-[12px] relative items-center bg-white/5 backdrop-blur-[48.8px] p-[7px] pl-4 max-sm:p-0 max-sm:pr-[3px] max-sm:bg-transparent max-sm:backdrop-blur-[0] justify-between">
@@ -190,7 +191,7 @@ export default function Header({ data, dataButtons }: HeaderProps) {
       </AnimatePresence>
     </>
   ) : (
-    <header className="fixed w-full top-0 z-10 bg-[rgba(10,10,10,0.92)] backdrop-blur-lg border-b border-[rgba(255,255,255,0.07)] py-[18px]">
+    <header className="fixed z-200 w-full top-0 bg-[rgba(10,10,10,0.92)] backdrop-blur-lg border-b border-[rgba(255,255,255,0.07)] py-[18px]">
       <div
         className="max-width-[800px] mx-auto px-6 flex items-center justify-between gap-4"
         style={{ maxWidth: "800px" }}

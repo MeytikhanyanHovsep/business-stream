@@ -6,7 +6,7 @@ const client = createClient({
   apiVersion: "2026-01-01",
   useCdn: false,
 });
-
+// git fetch origin git reset --hard origin/main git log -1 --oneline pm2 restart business-stream
 export async function GET() {
   try {
     const data = await client.fetch(

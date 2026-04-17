@@ -32,18 +32,40 @@ export default defineType({
       name: "menu",
       title: "Меню навигации",
       type: "array",
-      hidden: ({ document }) => document?.headerType === "simple",
       of: [
         {
           type: "object",
           fields: [
-            { name: "label", type: "string", title: "Название" },
+            {
+              name: "label",
+              type: "string",
+              title: "Название пункта (например: О нас)",
+            },
             {
               name: "target",
               type: "string",
-              title: "ID секции (для скролла)",
+              title: "Куда ведет ссылка (выберите секцию)",
+              options: {
+                list: [
+                  { title: "Главная", value: "#home" },
+                  { title: "Преимущества", value: "#advantages" },
+                  { title: "О нас", value: "#about" },
+                  { title: "Тарифы", value: "#pricing" },
+                  { title: "Кейсы", value: "#cases" },
+                  { title: "Отзывы", value: "#reviews" },
+                  { title: "FAQ", value: "#faq" },
+                  { title: "Контакты", value: "#contacts" },
+                  { title: "Галерея", value: "#gallery" },
+                ],
+              },
             },
           ],
+          preview: {
+            select: {
+              title: "label",
+              subtitle: "target",
+            },
+          },
         },
       ],
     }),

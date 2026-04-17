@@ -27,7 +27,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const settings = await getSiteSettings();
-  console.log(settings);
   return (
     <html
       lang="ru"

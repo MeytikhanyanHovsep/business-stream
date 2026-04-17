@@ -12,38 +12,43 @@ import "swiper/css/navigation";
 const BASE_OFFSET = 72;
 const ITEM_WIDTH = 64;
 
-export default function Gallery() {
+export default function Gallery({ data }: any) {
   const swiperRef = useRef<SwiperType | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const items = [
-    "/images/hero-bg.png",
-    "/images/hero-bg.png",
-    "/images/hero-bg.png",
-    "/images/hero-bg.png",
-    "/images/hero-bg.png",
-  ];
+  const indexStr = data?.indexStr || "[06]";
+  const title = data?.title || "Кейсы";
+  const subtitle =
+    data?.subtitle || "Кейсы видеосъёмки и онлайн- трансляций мероприятий";
+  const description =
+    data?.description ||
+    "Снимаем эмоции, масштаб и человеческие истории. Работаем с PR- и \n маркетинг- отделами, берём на себя организацию видеосъемки \n и трансляций «под ключ»";
+
+  const items =
+    data?.images && data?.images.length > 0
+      ? data.images.map((img: any) => img.asset?.url || img)
+      : [
+          "/images/hero-bg.png",
+          "/images/hero-bg.png",
+          "/images/hero-bg.png",
+          "/images/hero-bg.png",
+          "/images/hero-bg.png",
+        ];
 
   const TOTAL = items.length;
   const counter = BASE_OFFSET + activeIndex;
 
   return (
-    <section className="container pt-[247px] max-lg:pt-[82px]">
+    <section id="gallery" className="container pt-[247px] max-lg:pt-[82px]">
       <Title
         gap={24}
         description={
-          <span style={{ whiteSpace: "pre-line" }}>
-            Снимаем эмоции, масштаб и человеческие истории. Работаем с PR- и \n
-            маркетинг- отделами, берём на себя организацию видеосъемки \n и
-            трансляций «под ключ
-          </span>
+          <span style={{ whiteSpace: "pre-line" }}>{description}</span>
         }
-        title="Кейсы"
-        index="[06]"
+        title={title}
+        index={indexStr}
       >
-        <span style={{ whiteSpace: "pre-line" }}>
-          Кейсы видеосъёмки и онлайн- трансляций мероприятий
-        </span>
+        <span style={{ whiteSpace: "pre-line" }}>{subtitle}</span>
       </Title>
       <div className="w-full">
         <Swiper
@@ -68,7 +73,7 @@ export default function Gallery() {
           loop={true}
           className="w-full "
         >
-          {items.map((e, i) => (
+          {items.map((e: string, i: number) => (
             <SwiperSlide key={i} className=" flex">
               <div>
                 <Image
@@ -76,7 +81,7 @@ export default function Gallery() {
                   height={500}
                   className="object-cover w-full h-[400px] max-h-[400px]"
                   alt="gallery-picture"
-                  src="/images/hero-bg.png"
+                  src={e}
                 />
               </div>
             </SwiperSlide>
@@ -96,7 +101,7 @@ export default function Gallery() {
             />
           </div>
 
-          <div className="flex items-center justify-center w-full h-full [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] relative">
+          <div className="flex items-center justify-center w-full h-full mask-[linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] relative">
             <motion.div
               className="flex items-center absolute left-1/2"
               initial={false}
@@ -115,7 +120,7 @@ export default function Gallery() {
                   >
                     <span
                       onClick={() => swiperRef.current?.slideToLoop(num - 1)}
-                      className={`w-[32px] text-center cursor-pointer transition-all duration-500 font-medium tracking-[0.1em] ${
+                      className={`w-[32px] text-center cursor-pointer transition-all duration-500 font-medium ${
                         isActive
                           ? "text-white scale-20"
                           : "text-white text-[16px]"
@@ -139,7 +144,7 @@ export default function Gallery() {
           <button
             type="button"
             onClick={() => swiperRef.current?.slidePrev()}
-            className="w-[56px] h-[56px] transition-colors hover:bg-[#252525] bg-[#141414] border border-white/5 grid place-items-center cursor-pointer"
+            className="w-[56px] h-[56px] transition-colors hover:bg-orange bg-[#141414] grid place-items-center cursor-pointer"
           >
             <Image
               src="/images/icons/left-arrow.svg"
@@ -151,7 +156,7 @@ export default function Gallery() {
           <button
             type="button"
             onClick={() => swiperRef.current?.slideNext()}
-            className="w-[56px] h-[56px] transition-colors hover:bg-[#252525] bg-[#141414] border border-white/5 grid place-items-center cursor-pointer"
+            className="w-[56px] h-[56px] transition-colors hover:bg-orange bg-[#141414] grid place-items-center cursor-pointer"
           >
             <Image
               src="/images/icons/left-arrow.svg"
