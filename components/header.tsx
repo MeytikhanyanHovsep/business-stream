@@ -78,8 +78,9 @@ export default function Header({ data, dataButtons }: HeaderProps) {
   }, [currentMenu]);
 
   const handleScroll = (target: string) => {
-    lenis?.scrollTo(target, {
-      offset: target === "#hero" ? -100 : 150,
+    const targ = target.includes("#") ? target : "#" + target;
+    lenis?.scrollTo(targ, {
+      offset: targ === "#hero" ? -100 : 150,
       duration: 3,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });

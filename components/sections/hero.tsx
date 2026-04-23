@@ -89,7 +89,7 @@ export default function Hero({ data, advantagesData }: Props) {
           <h2 className="tracking-[-4%] max-md:max-w-[270px] text-center text-white text-[21px] leading-[133%] mt-[50px]">
             {data?.subtitle || "Reels-ролик с вашего события через 48 часов!"}
           </h2>
-          <div className="flex max-sm:w-full max-sm:flex-col gap-[10px] mt-[34px]">
+          <div className="flex relative z-10 max-sm:w-full max-sm:flex-col gap-[10px] mt-[34px]">
             <Button modal="discuss" hasDetails={true} style="max-sm:min-w-full">
               {data?.heroButton || "Обсудить проект"}
             </Button>
@@ -103,7 +103,7 @@ export default function Hero({ data, advantagesData }: Props) {
           </div>
         </div>
         <span className="min-h-full left-[50.8%] max-md:hidden top-0 -translate-x-1/2 w-px bg-white/11 absolute"></span>
-        <div className="left-0 w-screen absolute max-md:-bottom-[160px] -bottom-[232px]">
+        <div className="left-0 w-screen z-2 absolute max-md:-bottom-[160px] -bottom-[232px]">
           <div className="relative">
             <Image
               className="min-w-[465px] max-md:min-w-[307px] max-md:max-w-[307px] relative z-40 mx-auto object-contain"

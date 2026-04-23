@@ -50,10 +50,11 @@ export default function Footer({ data }: FooterProps) {
       ];
 
   const handleScroll = (target: string) => {
-    lenis?.scrollTo(target, {
-      offset: target == "#heri" ? -100 : 150,
+    const targ = target.includes("#") ? target : "#" + target;
+    lenis?.scrollTo(targ, {
+      offset: targ === "#hero" ? -100 : 150,
       duration: 3,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
   };
 

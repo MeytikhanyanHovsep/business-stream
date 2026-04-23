@@ -159,7 +159,7 @@ export default function Quiz({ data }: Props) {
   return (
     <section ref={containerRef} className="relative max-md:h-screen h-[200vh]">
       <div className="sticky top-0 h-screen w-full  flex items-center justify-center">
-        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none max-w-screen overflow-hidden">
           {mediaItems.map((item) => (
             <FloatingImage
               key={item.id}

@@ -29,7 +29,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster }) => {
       onMouseLeave={() => setIsHovered(false)}
       className="relative group"
     >
-      <div className="aspect-video w-full bg-[#1A1A1A] rounded overflow-hidden relative pointer-events-auto md:hover:scale-95 transition-all duration-300">
+      <div className="aspect-video w-full bg-[#1A1A1A] rounded overflow-hidden relative pointer-events-auto md:group-hover:scale-95 transition-all duration-300">
         <video
           ref={videoRef}
           src={src}
